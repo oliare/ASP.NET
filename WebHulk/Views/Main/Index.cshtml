@@ -1,0 +1,20 @@
+﻿@model IEnumerable<WebHulk.DATA.Entities.CategoryEntity>
+
+<div class="container">
+    <h1 class="text-center mt-3">Тактичне спорядження</h1>
+
+    <div class="row">
+        @foreach (var c in Model)
+        {
+            <div class="col-md-2 mt-4">
+                <div class="text-center mt-3">
+                    <img src="@c.Image" class="w-50" alt="@c.Name" />
+                    <div>
+                        <h6 class="mt-2">@c.Name</h6>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
