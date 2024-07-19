@@ -20,6 +20,7 @@ namespace WebHulk.Controllers
             return View();
         }
 
+        [HttpPost]
         public IActionResult Create(CategoryCreateViewModel createModel)
         {
             if (!ModelState.IsValid)
@@ -31,7 +32,7 @@ namespace WebHulk.Controllers
                 Image = createModel.Image
             });
             context.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
             
         public IActionResult Index()
