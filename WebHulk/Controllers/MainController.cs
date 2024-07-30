@@ -14,6 +14,22 @@ namespace WebHulk.Controllers
             this.context = context;
         }
 
+        public IActionResult Index()
+        {
+            var categories = context.Categories
+                .Select(x => new CategoryItemViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Image = x.Image
+                })
+                .ToList();
+
+            if (categories == null) Console.WriteLine("Categories is null..");
+            return View(categories);
+        }
+
+
         [HttpGet]
         public IActionResult Create()
         {
@@ -34,20 +50,52 @@ namespace WebHulk.Controllers
             context.SaveChanges();
             return RedirectToAction(nameof(Index));
         }
-            
-        public IActionResult Index()
-        {
-            var categories = context.Categories
-                .Select(x => new CategoryItemViewModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Image = x.Image
-                })
-                .ToList();
 
-            if (categories == null) Console.WriteLine("Categories is null..");
-            return View(categories);
+        [HttpGet]   
+        public IActionResult Edit(int id)
+        {
+            var item = context.Categories
+                .Where(c => c.Id == id)
+                .Select(c => new CategoryEditViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Image = c.Image
+                })
+                .FirstOrDefault();
+
+            if (item == null) return NotFound();
+
+            return View(item);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(CategoryEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var item = context.Categories.Find(model.Id);
+
+            item.Name = model.Name;
+            item.Image = model.Image;
+
+            context.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            var item = context.Categories.Find(id);
+
+            if (item == null) return NotFound();
+
+            context.Categories.Remove(item);
+            context.SaveChanges();
+                
+            return RedirectToAction("Index");
         }
     }
+
 }

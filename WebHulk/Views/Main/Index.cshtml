@@ -6,14 +6,44 @@
     <div class="row">
         @foreach (var c in Model)
         {
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <div class="card mt-4 h-100">
+            <div class="col-lg-2 col-md-4 col-sm-6 mt-4">
+                <div class="card h-100">
                     <img class="card-img-top img-fluid" src="@c.Image" alt="@c.Name">
-                    <div class="card-body d-flex align-items-center justify-content-center">
-                        <h6 class="card-title text-center ">@c.Name</h6>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h6 class="card-title">@c.Name</h6>
+
+                        <div class="d-flex justify-content-between mt-auto">
+                            <a href="/main/edit/@c.Id" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="/main/delete/@c.Id" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@c.Id">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="deleteModal-@c.Id" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel-@c.Id">Remove a category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete "@c.Name"?</p>
+                            <form method="post" action="/Main/Delete">
+                                <input type="hidden" name="id" value="@c.Id" />
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         }
     </div>
 
