@@ -51,9 +51,10 @@ namespace WebHulk.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]   
+        [HttpGet]
         public IActionResult Edit(int id)
         {
+
             var item = context.Categories
                 .Where(c => c.Id == id)
                 .Select(c => new CategoryEditViewModel
@@ -62,9 +63,7 @@ namespace WebHulk.Controllers
                     Name = c.Name,
                     Image = c.Image
                 })
-                .FirstOrDefault();
-
-            if (item == null) return NotFound();
+                .FirstOrDefault() ?? throw new InvalidDataException($"Item with such id={id} doesn`t exist");
 
             return View(item);
         }
@@ -75,7 +74,8 @@ namespace WebHulk.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var item = context.Categories.Find(model.Id);
+            var item = context.Categories.Find(model.Id) 
+                ?? throw new InvalidDataException($"no matches found");
 
             item.Name = model.Name;
             item.Image = model.Image;
@@ -93,7 +93,7 @@ namespace WebHulk.Controllers
 
             context.Categories.Remove(item);
             context.SaveChanges();
-                
+
             return RedirectToAction("Index");
         }
     }
