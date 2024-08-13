@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
 using WebHulk.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,12 +17,22 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    
+
 }
 
 app.UseStaticFiles();
 
+string dirSave = Path.Combine(Directory.GetCurrentDirectory(), "images");
+if (!Directory.Exists(dirSave))
+    Directory.CreateDirectory(dirSave);
+
 app.UseRouting();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(dirSave),
+    RequestPath = "/images"
+});
 
 app.UseAuthorization();
 

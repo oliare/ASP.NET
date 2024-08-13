@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebHulk.Data;
 using WebHulk.DATA.Entities;
 using WebHulk.Models.Categories;
@@ -29,7 +30,6 @@ namespace WebHulk.Controllers
             return View(categories);
         }
 
-
         [HttpGet]
         public IActionResult Create()
         {
@@ -37,15 +37,23 @@ namespace WebHulk.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CategoryCreateViewModel createModel)
+        public async Task<IActionResult> CreateAsync(CategoryCreateViewModel createModel)
         {
             if (!ModelState.IsValid)
                 return View(createModel);
 
+            string ext = Path.GetExtension(createModel.Image.FileName);
+            string fName = Guid.NewGuid().ToString() + ext;
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "images", fName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+                await createModel.Image.CopyToAsync(stream);
+
             context.Categories.Add(new CategoryEntity
             {
                 Name = createModel.Name,
-                Image = createModel.Image
+                Image = fName
             });
             context.SaveChanges();
             return RedirectToAction(nameof(Index));
@@ -54,7 +62,6 @@ namespace WebHulk.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-
             var item = context.Categories
                 .Where(c => c.Id == id)
                 .Select(c => new CategoryEditViewModel
@@ -74,11 +81,24 @@ namespace WebHulk.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var item = context.Categories.Find(model.Id) 
-                ?? throw new InvalidDataException($"no matches found");
+            var item = context.Categories.Find(model.Id) ?? throw new InvalidDataException("Category not found");
 
             item.Name = model.Name;
-            item.Image = model.Image;
+            var images = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+
+            if (model.NewImage != null)
+            {
+                var currentImg = Path.Combine(images, item.Image);
+                if (System.IO.File.Exists(currentImg))
+                    System.IO.File.Delete(currentImg);
+
+                var newImg = Guid.NewGuid().ToString() + Path.GetExtension(model.NewImage.FileName);
+                var newPath = Path.Combine(images, newImg);
+                using (var stream = new FileStream(newPath, FileMode.Create))
+                    model.NewImage.CopyTo(stream);
+
+                item.Image = newImg;
+            }
 
             context.SaveChanges();
             return RedirectToAction(nameof(Index));
@@ -87,14 +107,15 @@ namespace WebHulk.Controllers
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var item = context.Categories.Find(id);
+            var item = context.Categories.Find(id) ?? throw new InvalidDataException("Category not found");
 
-            if (item == null) return NotFound();
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "images", item.Image);
+            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
 
             context.Categories.Remove(item);
             context.SaveChanges();
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 

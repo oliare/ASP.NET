@@ -8,7 +8,7 @@ namespace WebHulk.Models.Categories
         //[Display(Name = "Name")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Image is required")]
-        public string Image { get; set; } = string.Empty;
+        [DataType(DataType.Upload)]
+        public required IFormFile Image { get; set; }
     }
 }
