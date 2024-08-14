@@ -13,7 +13,7 @@
                         <h6 class="card-title">@c.Name</h6>
 
                         <div class="d-flex justify-content-between mt-auto">
-                            <a href="/main/edit/@c.Id" class="btn btn-outline-secondary btn-sm">
+                            <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-outline-secondary btn-sm">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <a href="/main/delete/@c.Id" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@c.Id">

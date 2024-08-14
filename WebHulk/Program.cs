@@ -11,6 +11,8 @@ builder.Services.AddDbContext<HulkDbContext>(opt =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddAutoMapper(typeof(AppMapProfile));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

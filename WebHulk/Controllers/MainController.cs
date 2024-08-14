@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebHulk.Data;
 using WebHulk.DATA.Entities;
@@ -9,21 +11,24 @@ namespace WebHulk.Controllers
     public class MainController : Controller
     {
         private readonly HulkDbContext context;
+        private readonly IMapper _mapper;
 
-        public MainController(HulkDbContext context)
+        public MainController(HulkDbContext context, IMapper mapper)
         {
             this.context = context;
+            _mapper = mapper;
         }
 
         public IActionResult Index()
         {
             var categories = context.Categories
-                .Select(x => new CategoryItemViewModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Image = x.Image
-                })
+                .ProjectTo<CategoryItemViewModel>(_mapper.ConfigurationProvider)
+                //.Select(x => new CategoryItemViewModel
+                //{
+                //    Id = x.Id,
+                //    Name = x.Name,
+                //    Image = x.Image
+                //})
                 .ToList();
 
             if (categories == null) Console.WriteLine("Categories is null..");
@@ -64,12 +69,13 @@ namespace WebHulk.Controllers
         {
             var item = context.Categories
                 .Where(c => c.Id == id)
-                .Select(c => new CategoryEditViewModel
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Image = c.Image
-                })
+                .ProjectTo<CategoryEditViewModel>(_mapper.ConfigurationProvider)
+                //.Select(c => new CategoryEditViewModel
+                //{
+                //    Id = c.Id,
+                //    Name = c.Name,
+                //    Image = c.Image
+                //})
                 .FirstOrDefault() ?? throw new InvalidDataException($"Item with such id={id} doesn`t exist");
 
             return View(item);
@@ -84,7 +90,7 @@ namespace WebHulk.Controllers
             var item = context.Categories.Find(model.Id) ?? throw new InvalidDataException("Category not found");
 
             item.Name = model.Name;
-            var images = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+            var images = Path.Combine(Directory.GetCurrentDirectory(), "images");
 
             if (model.NewImage != null)
             {
