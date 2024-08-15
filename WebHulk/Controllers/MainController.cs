@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using WebHulk.Data;
 using WebHulk.DATA.Entities;
 using WebHulk.Models.Categories;
+using WebHulk.Models.Products;
 
 namespace WebHulk.Controllers
 {
@@ -122,6 +123,17 @@ namespace WebHulk.Controllers
             context.SaveChanges();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult Products(int id)
+        {
+            var list = context.Products
+                .Where(p => p.CategoryId == id)
+                .ProjectTo<ProductViewModel>(_mapper.ConfigurationProvider)
+                .ToList();
+
+            return View(list);
         }
     }
 

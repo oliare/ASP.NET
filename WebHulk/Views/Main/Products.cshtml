@@ -1,0 +1,25 @@
+﻿@model IList<ProductViewModel>
+
+<div class="container mt-3 mb-5">
+    <h2 class="text-center">Products in @Model.FirstOrDefault()?.Name Category</h2>
+    <div class="row">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    @if (!string.IsNullOrEmpty(product.Image))
+                    {
+                        <img src="@Url.Content("~/images/" + product.Image)" class="card-img-top" alt="@product.Name" />
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="No image available" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@product.Name</h5>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
