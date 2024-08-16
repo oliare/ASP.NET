@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using WebHulk.Data.Entities;
 using WebHulk.DATA.Entities;
 
@@ -16,16 +17,16 @@ namespace WebHulk.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Product>()
-                .HasMany(p => p.ProductImages)    
-                .WithOne(pi => pi.Product)        
+                .HasMany(p => p.ProductImages)
+                .WithOne(pi => pi.Product)
                 .HasForeignKey(pi => pi.ProductId);
 
             modelBuilder.Entity<ProductImage>()
                 .HasOne(pi => pi.Product)
                 .WithMany(p => p.ProductImages)
                 .HasForeignKey(pi => pi.ProductId);
-
         }
+
     }
 
 }
