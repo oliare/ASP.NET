@@ -5,5 +5,5 @@ public class ProductCreateViewModel
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int CategoryId { get; set; }
-    public string Base64Images { get; set; } = string.Empty;
+    public string Images { get; set; } = string.Empty;
 }

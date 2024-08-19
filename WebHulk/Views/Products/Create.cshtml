@@ -28,7 +28,7 @@
             <input id="imageInput" type="file" multiple class="form-control" />
         </div>
 
-        <input asp-for="Base64Images" id="Base64Images" type="hidden" />
+        <input asp-for="Images" id="Images" type="hidden" />
 
         <div class="form-group mt-3">
             <div id="imagePreview" class="d-flex flex-wrap"></div>
@@ -43,7 +43,7 @@
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
     <script>
-        const base64ImagesArray = [];
+        const images = [];
 
         document.getElementById('imageInput').addEventListener('change', function (event) {
             const previewContainer = document.getElementById('imagePreview');
@@ -62,9 +62,9 @@
                     imgElement.style.borderRadius = '5px';
                     previewContainer.appendChild(imgElement);
 
-                    base64ImagesArray.push(e.target.result);
+                    images.push(e.target.result);
 
-                    document.querySelector('input[name="Base64Images"]').value = JSON.stringify(base64ImagesArray);
+                    document.querySelector('input[name="Images"]').value = JSON.stringify(images);
                 };
 
                 reader.readAsDataURL(file);

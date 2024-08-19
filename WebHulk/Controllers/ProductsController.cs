@@ -7,6 +7,7 @@ using WebHulk.DATA.Entities;
 using WebHulk.Models.Categories;
 using WebHulk.Data.Entities;
 using System.Text.Json;
+using System;
 
 namespace WebHulk.Controllers
 {
@@ -25,7 +26,7 @@ namespace WebHulk.Controllers
 
         public IActionResult Index([FromRoute] int id)
         {
-            var list = _context.Products
+            var list = _context.Products.Where(x => x.CategoryId == id)
                   .ProjectTo<ProductItemViewModel>(_mapper.ConfigurationProvider)
                   .ToList() ?? throw new Exception("Failed to get products");
 
@@ -60,35 +61,33 @@ namespace WebHulk.Controllers
             await _context.Products.AddAsync(prod, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            if (!string.IsNullOrEmpty(model.Base64Images))
+            if (!string.IsNullOrEmpty(model.Images))
             {
-                var base64Images = new List<string>();
-
+                var arr = new List<string>();
                 try
                 {
-                    base64Images = JsonSerializer.Deserialize<List<string>>(model.Base64Images) ?? [];
+                    arr = JsonSerializer.Deserialize<List<string>>(model.Images) ?? [];
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failed to deserialize base64 images");
                 }
 
-                foreach (var base64Image in base64Images)
+                foreach (var i in arr)
                 {
-                    if (!string.IsNullOrWhiteSpace(base64Image))
+                    if (!string.IsNullOrWhiteSpace(i))
                     {
-                        // excluding the data:image/jpeg;base64, prefix
-                        var newImg = base64Image.Split(',')[1];
+                        // excluding the data --> image/jpeg;base64, prefix
+                        var newImg = i.Split(',')[1];
 
-                        // Decode the Base64 string to get the image bytes
-                        var imageBytes = Convert.FromBase64String(newImg);
-                        var uniqueFileName = Guid.NewGuid().ToString() + ".jpg"; // Assuming JPG format, adjust as needed
-                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "images", uniqueFileName);
+                        var bytes = Convert.FromBase64String(newImg);
+                        var fName = Guid.NewGuid().ToString() + ".jpg"; // !!!
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "images", fName);
 
-                        await System.IO.File.WriteAllBytesAsync(filePath, imageBytes, cancellationToken);
+                        await System.IO.File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
                         var img = new ProductImage
                         {
-                            Image = uniqueFileName,
+                            Image = fName,
                             Product = prod,
                         };
                         _context.ProductImages.Add(img);
@@ -98,54 +97,8 @@ namespace WebHulk.Controllers
 
             _context.SaveChanges();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Main");
         }
-
-
-
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> Create(ProductCreateViewModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //        return View(model);
-
-        //    var prod = new Product
-        //    {
-        //        Name = model.Name,
-        //        Price = model.Price,
-        //        CategoryId = model.CategoryId
-        //    };
-
-        //    _context.Products.Add(prod);
-        //    await _context.SaveChangesAsync();
-
-        //    foreach (var i in model.Images)
-        //    {
-        //        if (i.Length > 0)
-        //        {
-        //            var fName = Path.GetFileName(i.FileName);
-        //            var path = Path.Combine(Directory.GetCurrentDirectory(), "images", fName);
-
-        //            using (var stream = new FileStream(path, FileMode.Create))
-        //                await i.CopyToAsync(stream);
-
-        //            var img = new ProductImage
-        //            {
-        //                Image = fName,
-        //                Product = prod
-        //            };
-        //            _context.ProductImages.Add(img);
-        //        }
-        //    }
-
-        //    _context.SaveChanges();
-
-        //    return RedirectToAction(nameof(Index));
-        //}
-
-
 
     }
 
