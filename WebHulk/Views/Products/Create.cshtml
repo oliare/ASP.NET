@@ -1,0 +1,76 @@
+﻿@model ProductCreateViewModel
+
+@{
+    var idFromQuery = Context.Request.Query["categoryid"].FirstOrDefault();
+}
+
+<div class="container col-md-4">
+    <h2 class="text-center my-4">Adding a new product</h2>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label asp-for="Name" class="control-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="form-group my-2">
+            <label asp-for="Price" class="control-label"></label>
+            <input asp-for="Price" type="number" min="0" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <input asp-for="CategoryId" value="@idFromQuery" type="hidden" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <input id="imageInput" type="file" multiple class="form-control" />
+        </div>
+
+        <input asp-for="Base64Images" id="Base64Images" type="hidden" />
+
+        <div class="form-group mt-3">
+            <div id="imagePreview" class="d-flex flex-wrap"></div>
+        </div>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-secondary">Create</button>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        const base64ImagesArray = [];
+
+        document.getElementById('imageInput').addEventListener('change', function (event) {
+            const previewContainer = document.getElementById('imagePreview');
+
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.style.maxWidth = '150px';
+                    imgElement.style.maxHeight = '100px';
+                    imgElement.style.padding = '5px';
+                    imgElement.style.borderRadius = '5px';
+                    previewContainer.appendChild(imgElement);
+
+                    base64ImagesArray.push(e.target.result);
+
+                    document.querySelector('input[name="Base64Images"]').value = JSON.stringify(base64ImagesArray);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+
+    </script>
+}
