@@ -45,9 +45,11 @@ app.MapControllerRoute(
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<HulkDbContext>();
+    //dbContext.Database.EnsureDeleted();
     dbContext.Database.Migrate();
     var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
     seeder.SeedProducts();
+    seeder.UpdateProductPrices();
 }
 
 app.Run();

@@ -10,6 +10,6 @@ public class AppMapProfile : Profile
     {
         CreateMap<CategoryEntity, CategoryItemViewModel>();
         CreateMap<CategoryEntity, CategoryEditViewModel>();
-        CreateMap<Product, ProductViewModel>();
+        CreateMap<Product, ProductItemViewModel>();
     }
 }
