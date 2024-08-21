@@ -21,8 +21,8 @@ namespace WebHulk.Services
                 _context.Categories.Add(c1);
                 _context.SaveChanges();
 
-                var p1 = new Product { Name = "Ноутбук HP EliteBook 840 G10", CategoryId = c1.Id };
-                var p2 = new Product { Name = "Ноутбук Dell Latitude 7640", CategoryId = c1.Id };
+                var p1 = new Product { Name = "Ноутбук HP EliteBook 840 G10", CategoryId = c1.Id, Price = 2350.00m };
+                var p2 = new Product { Name = "Ноутбук Dell Latitude 7640", CategoryId = c1.Id, Price = 2020.00m };
 
                 _context.Products.AddRange(p1, p2);
                 _context.ProductImages.AddRange(
@@ -37,21 +37,6 @@ namespace WebHulk.Services
 
                 _context.SaveChanges();
             }
-        }
-        public void UpdateProductPrices()
-        {
-            var products = _context.Products.ToList();
-
-            foreach (var p in products)
-            {
-                if (p.Name == "Ноутбук HP EliteBook 840 G10")
-                    p.Price = 2350.00m;
-
-                else if (p.Name == "Ноутбук Dell Latitude 7640")
-                    p.Price = 2020.00m;
-            }
-
-            _context.SaveChanges();
         }
     }
 }

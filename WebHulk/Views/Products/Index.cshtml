@@ -1,21 +1,20 @@
-﻿@using static WebHulk.Controllers.ProductsController
-@model ProdViewModel
+﻿@model List<ProductItemViewModel>
 
 <div class="container mt-3 mb-5">
     <h2 class="text-center">Products</h2>
-    <a asp-action="Create" asp-route-categoryId="@Model.CategoryId" class="btn btn-secondary my-3">Add</a>
+    <a asp-action="Create" class="btn btn-secondary my-3">Add</a>
     <div class="row">
-        @foreach (var p in Model.Products)
+        @foreach (var p in Model)
         {
             <div class="col-lg-3 col-md-3">
                 <div class="card mb-4">
-                    @if (p.ProductImages?.Count > 1)
+                    @if (p.Images?.Count > 1)
                     {
                         <div id="carousel-@p.Id" class="carousel slide m-3">
                             <div class="carousel-inner">
-                                @for (var i = 0; i < p.ProductImages?.Count; i++)
+                                @for (var i = 0; i < p.Images?.Count; i++)
                                 {
-                                    var image = p.ProductImages.ElementAt(i).Image;
+                                    var image = p.Images.ElementAt(i);
                                     <div class="carousel-item @(i == 0 ? "active" : "")">
                                         <img src="@Url.Content("~/images/" + image)" alt="@p.Name" />
                                     </div>
@@ -32,7 +31,7 @@
                     else
                     {
                         <div class="one-img m-3">
-                            <img src="@Url.Content("~/images/" + p.ProductImages.FirstOrDefault()?.Image)" alt="@p.Name" />
+                            <img src="@Url.Content("~/images/" + p.Images?.FirstOrDefault())" alt="@p.Name" />
                         </div>
                     }
 
@@ -85,8 +84,8 @@
         text-align: center;
     }
 
-    .carousel-control-prev-icon, 
-    .carousel-control-next-icon{
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
         background-color: gray;
         border-radius: 20%;
     }

@@ -3,11 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebHulk.Data;
 using WebHulk.Models.Products;
 using AutoMapper.QueryableExtensions;
-using WebHulk.DATA.Entities;
-using WebHulk.Models.Categories;
 using WebHulk.Data.Entities;
-using System.Text.Json;
-using System;
 
 namespace WebHulk.Controllers
 {
@@ -15,38 +11,39 @@ namespace WebHulk.Controllers
     {
         private readonly HulkDbContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(HulkDbContext context, IMapper mapper, ILogger<ProductsController> logger)
+        public ProductsController(HulkDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _logger = logger;
         }
 
-        public IActionResult Index([FromRoute] int id)
+        public IActionResult Index()
         {
-            var list = _context.Products.Where(x => x.CategoryId == id)
+            var list = _context.Products
                   .ProjectTo<ProductItemViewModel>(_mapper.ConfigurationProvider)
                   .ToList() ?? throw new Exception("Failed to get products");
 
-            return View(new ProdViewModel { CategoryId = id, Products = list });
-        }
-
-        public class ProdViewModel
-        {
-            public int CategoryId { get; set; }
-            public List<ProductItemViewModel> Products { get; set; }
+            return View(list);
         }
 
         [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            var categories = _context.Categories
+                .Select(x => new { Value = x.Id, Text = x.Name })
+                .ToList();
+
+            ProductCreateViewModel viewModel = new()
+            {
+                CategoryList = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(categories, "Value", "Text")
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProductCreateViewModel model, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create(ProductCreateViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -58,48 +55,33 @@ namespace WebHulk.Controllers
                 CategoryId = model.CategoryId,
             };
 
-            await _context.Products.AddAsync(prod, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _context.Products.AddAsync(prod);
+            await _context.SaveChangesAsync();
 
-            if (!string.IsNullOrEmpty(model.Images))
+            if (model.Photos != null)
             {
-                var arr = new List<string>();
-                try
+                foreach (var img in model.Photos)
                 {
-                    arr = JsonSerializer.Deserialize<List<string>>(model.Images) ?? [];
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to deserialize base64 images");
-                }
+                    string ext = Path.GetExtension(img.FileName);
 
-                foreach (var i in arr)
-                {
-                    if (!string.IsNullOrWhiteSpace(i))
+                    string fName = Guid.NewGuid().ToString() + ext;
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "images", fName);
+
+                    using (var fs = new FileStream(path, FileMode.Create))
+                        await img.CopyToAsync(fs);
+
+                    var imgEntity = new ProductImage
                     {
-                        // excluding the data --> image/jpeg;base64, prefix
-                        var newImg = i.Split(',')[1];
-
-                        var bytes = Convert.FromBase64String(newImg);
-                        var fName = Guid.NewGuid().ToString() + ".jpg"; // !!!
-                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "images", fName);
-
-                        await System.IO.File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
-                        var img = new ProductImage
-                        {
-                            Image = fName,
-                            Product = prod,
-                        };
-                        _context.ProductImages.Add(img);
-                    }
+                        Image = fName,
+                        Product = prod,
+                    };
+                    _context.ProductImages.Add(imgEntity);
+                    _context.SaveChanges();
                 }
             }
 
-            _context.SaveChanges();
-
-            return RedirectToAction("Index", "Main");
+            return RedirectToAction(nameof(Index));
         }
-
     }
 
 }

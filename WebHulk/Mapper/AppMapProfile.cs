@@ -10,6 +10,7 @@ public class AppMapProfile : Profile
     {
         CreateMap<CategoryEntity, CategoryItemViewModel>();
         CreateMap<CategoryEntity, CategoryEditViewModel>();
-        CreateMap<Product, ProductItemViewModel>();
+        CreateMap<Product, ProductItemViewModel>()
+                        .ForMember(x => x.Images, opt => opt.MapFrom(x => x.ProductImages.Select(p => p.Image).ToArray()));
     }
 }
