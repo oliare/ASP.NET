@@ -13,9 +13,19 @@ public class AppMapProfile : Profile
 
         CreateMap<Product, ProductItemViewModel>()
             .ForMember(x => x.Images, opt => opt.MapFrom(x => x.ProductImages.Select(p => p.Image).ToArray()));
+
         CreateMap<Product, ProductEditViewModel>()
-          .ForMember(x => x.Images, opt => opt.MapFrom(src => src.ProductImages.Select(p => p.Image).ToList()));
+          .ForMember(x => x.Images, opt => 
+          opt.MapFrom(src => src.ProductImages
+          .Select(pi => new ProductImageViewModel
+          {
+              Id = pi.Id,
+              Name = "/images/" + pi.Image,
+              Priority = pi.Priotity
+          }).ToList()));
+
         CreateMap<ProductEditViewModel, Product>()
             .ForMember(x => x.Id, opt => opt.Ignore());
+
     }
 }

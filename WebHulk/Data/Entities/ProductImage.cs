@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public string Image { get; set; } = string.Empty;
+        public int Priotity { get; set; }
         public int ProductId { get; set; }
         public required Product Product { get; set; }
 

@@ -1,6 +1,4 @@
-﻿using WebHulk.Data.Entities;
-
-namespace WebHulk.Models.Products
+﻿namespace WebHulk.Models.Products
 {
     public class ProductItemViewModel
     {

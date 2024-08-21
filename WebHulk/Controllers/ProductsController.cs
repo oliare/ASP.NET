@@ -62,6 +62,7 @@ namespace WebHulk.Controllers
 
             if (model.Photos != null)
             {
+                int i = 0;
                 foreach (var img in model.Photos)
                 {
                     string ext = Path.GetExtension(img.FileName);
@@ -75,6 +76,7 @@ namespace WebHulk.Controllers
                     var imgEntity = new ProductImage
                     {
                         Image = fName,
+                        Priotity = i++,
                         Product = prod,
                     };
                     _context.ProductImages.Add(imgEntity);
@@ -88,8 +90,8 @@ namespace WebHulk.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var prod = _context.Products
-                .Include(p => p.ProductImages)
+            var model = _context.Products
+                .ProjectTo<ProductEditViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefault(x => x.Id == id)
                 ?? throw new Exception("An error occurred while receiving the product");
 
@@ -97,11 +99,11 @@ namespace WebHulk.Controllers
                 .Select(x => new { Value = x.Id, Text = x.Name })
                 .ToList();
 
-            var model = _mapper.Map<ProductEditViewModel>(prod);
             model.CategoryList = new SelectList(categories, "Value", "Text");
 
             return View(model);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Edit(ProductEditViewModel model)
@@ -109,26 +111,12 @@ namespace WebHulk.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var product = _context.Products
-                 .Include(p => p.ProductImages)
-                 .FirstOrDefault(p => p.Id == model.Id)
-                 ?? throw new Exception("No product was found");
-           
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == model.Id)
+                ?? throw new Exception("No product was found");
+
             _mapper.Map(model, product);
 
-            // delete old images
-            if (product.ProductImages != null)
-            {
-                foreach (var img in product.ProductImages.ToList())
-                {
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "images", img.Image);
-
-                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
-                    _context.ProductImages.Remove(img);
-                }
-            }
-
-            // then add new photos
             if (model.NewImages != null)
             {
                 foreach (var img in model.NewImages)
@@ -151,10 +139,26 @@ namespace WebHulk.Controllers
                     }
                 }
             }
+
+            if (model.DeletedPhotoIds != null)
+            {
+                var photos = _context.ProductImages
+                    .Where(pi => model.DeletedPhotoIds.Contains(pi.Id))
+                    .ToList();
+
+                _context.ProductImages.RemoveRange(photos);
+
+                foreach (var photo in photos)
+                {
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "images", photo.Image);
+                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                }
+            }
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
