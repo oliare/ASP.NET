@@ -7,7 +7,8 @@ namespace WebHulk.Models.Products
     {
         public int Id { get; set; }
         public string Name { get; set; } = String.Empty;
-        public decimal Price { get; set; }
+        [RegularExpression(@"^\d+(\,\d{1,2})?$", ErrorMessage = "Provide valid price")]
+        public string? Price { get; set; }
         public SelectList? CategoryList { get; set; }
         [Display(Name = "Category")]
         [Required(ErrorMessage = "Choose a category")]

@@ -1,4 +1,5 @@
-﻿using WebHulk.Data;
+﻿using Microsoft.AspNetCore.Identity;
+using WebHulk.Data;
 using WebHulk.Data.Entities;
 using WebHulk.DATA.Entities;
 
@@ -12,7 +13,8 @@ namespace WebHulk.Services
         {
             _context = context;
         }
-        public void SeedProducts()
+
+     public void SeedProducts()
         {
             if (_context.Products.Count() == 0)
             {
