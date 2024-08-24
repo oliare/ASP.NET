@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using WebHulk.Data;
+using WebHulk.Data.Entities.Identity;
 using WebHulk.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,25 @@ builder.Services.AddDbContext<HulkDbContext>(opt =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(typeof(AppMapProfile));
 builder.Services.AddScoped<DataSeeder>();
+
+// Identity options
+builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
+
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    options.SignIn.RequireConfirmedEmail = true;
+})
+    .AddEntityFrameworkStores<HulkDbContext>()
+    .AddDefaultTokenProviders();
 
 
 var app = builder.Build();
@@ -36,6 +57,9 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
+//
+app.UseCookiePolicy();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

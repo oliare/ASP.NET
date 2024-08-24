@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WebHulk.Data.Entities;
+using WebHulk.Data.Entities.Identity;
 using WebHulk.DATA.Entities;
 
 namespace WebHulk.Data
 {
-    public class HulkDbContext : DbContext
+    public class HulkDbContext : IdentityDbContext<UserEntity, RoleEntity, int>
     {
         public HulkDbContext(DbContextOptions<HulkDbContext> options) : base(options) { }
 
@@ -16,6 +17,7 @@ namespace WebHulk.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // product
             modelBuilder.Entity<Product>()
                 .HasMany(p => p.ProductImages)
                 .WithOne(pi => pi.Product)
@@ -25,8 +27,7 @@ namespace WebHulk.Data
                 .HasOne(pi => pi.Product)
                 .WithMany(p => p.ProductImages)
                 .HasForeignKey(pi => pi.ProductId);
+
         }
-
     }
-
 }
