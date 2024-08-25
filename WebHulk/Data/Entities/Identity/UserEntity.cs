@@ -10,6 +10,6 @@ namespace WebHulk.Data.Entities.Identity
 
         [Required, StringLength(100)]
         public string LastName { get; set; } = string.Empty;
-        public ICollection<UserRoleEntity> UserRoles { get; set; }
+        public ICollection<UserRoleEntity> UserRoles { get; set; } = [];
     }
 }

@@ -28,6 +28,18 @@ namespace WebHulk.Data
                 .WithMany(p => p.ProductImages)
                 .HasForeignKey(pi => pi.ProductId);
 
+
+            // identity 
+            modelBuilder.Entity<UserRoleEntity>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
+
+            modelBuilder.Entity<UserRoleEntity>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.Roles)
+                .HasForeignKey(ur => ur.RoleId);
+
         }
     }
 }
