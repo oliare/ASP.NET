@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebHalk.Models.Account;
+using WebHulk.Models.Account;
 using WebHulk.Constants;
 using WebHulk.Data.Entities.Identity;
 
@@ -9,10 +10,14 @@ namespace WebHulk.Controllers
     public class AccountController : Controller
     {
         private readonly UserManager<UserEntity> _userManager;
+        private readonly SignInManager<UserEntity> _signInManager;
+        private readonly IMapper _mapper;
 
-        public AccountController(UserManager<UserEntity> userManager)
+        public AccountController(UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager, IMapper mapper)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -48,5 +53,48 @@ namespace WebHulk.Controllers
 
             return View(model);
         }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                var res = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+                if (res.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction(nameof(Profile));
+                }
+            }
+            ModelState.AddModelError("", "The data is incorrect.");
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Profile()
+        {
+            var id = _userManager.GetUserId(User);
+            if (id == null) return RedirectToAction(nameof(Login));
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var model = _mapper.Map<ProfileViewModel>(user);
+
+            return View(model);
+        }
+
     }
 }
