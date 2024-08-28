@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebHulk.Models.Account;
 using WebHulk.Constants;
 using WebHulk.Data.Entities.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebHulk.Controllers
 {
@@ -83,17 +84,23 @@ namespace WebHulk.Controllers
             return View(model);
         }
 
+        [Authorize]
         public async Task<IActionResult> Profile()
         {
             var id = _userManager.GetUserId(User);
-            if (id == null) return RedirectToAction(nameof(Login));
 
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
 
             var model = _mapper.Map<ProfileViewModel>(user);
 
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Redirect("/");
         }
 
     }
