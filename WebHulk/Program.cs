@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using WebHulk.Constants;
 using WebHulk.Data;
 using WebHulk.Data.Entities.Identity;
 using WebHulk.Services;
@@ -33,7 +34,6 @@ builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
 })
     .AddEntityFrameworkStores<HulkDbContext>()
     .AddDefaultTokenProviders();
-
 
 var app = builder.Build();
 

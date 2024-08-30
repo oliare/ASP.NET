@@ -23,7 +23,12 @@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <ul class="navbar-nav">
-
+                        @if (User.IsInRole("admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Admin" asp-action="Index">Dashboard</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page"
                                asp-action="Profile" asp-controller="Account">@User.Identity.Name</a>
@@ -32,7 +37,7 @@
                         <li class="nav-item">
                             @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
                             {
-                               <button class="nav-link btn btn-link">Logout</button>
+                                <button class="nav-link btn btn-link">Logout</button>
                             }
                         </li>
                     </ul>
