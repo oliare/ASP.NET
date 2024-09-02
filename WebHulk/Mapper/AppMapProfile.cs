@@ -4,7 +4,6 @@ using WebHulk.Data.Entities;
 using WebHulk.Data.Entities.Identity;
 using WebHulk.DATA.Entities;
 using WebHulk.Models.Account;
-using WebHulk.Models.Admin;
 using WebHulk.Models.Categories;
 using WebHulk.Models.Products;
 
@@ -35,8 +34,6 @@ public class AppMapProfile : Profile
 
         CreateMap<UserEntity, ProfileViewModel>()
             .ForMember(x=>x.FullName, opt=>opt.MapFrom(x=>$"{x.FirstName} {x.LastName}"));
-
-        CreateMap<UserEntity, UserItemViewModel>();
 
     }
 }

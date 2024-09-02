@@ -19,16 +19,16 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Products" asp-action="Index">Products</a>
                     </li>
+                    @if (User.IsInRole("admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index" asp-area="Admin">Admin Panel</a>
+                        </li>
+                    }
                 </ul>
                 @if (User.Identity.IsAuthenticated)
                 {
                     <ul class="navbar-nav">
-                        @if (User.IsInRole("admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Admin" asp-action="Index">Dashboard</a>
-                            </li>
-                        }
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page"
                                asp-action="Profile" asp-controller="Account">@User.Identity.Name</a>
