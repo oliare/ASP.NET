@@ -71,12 +71,17 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapAreaControllerRoute(
         name: "admin_area",
-        areaName:"Admin",
+        areaName: "Admin",
         pattern: "admin/{controller=Home}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
         name: "default",
         pattern: "{controller=Main}/{action=Index}/{id?}");
+
+    endpoints.MapControllerRoute(
+      name: "access_denied",
+      pattern: "{controller=Account}/{action=AccessDenied}/{id?}");
+        
 });
 #pragma warning restore ASP0014 // Suggest using top level route registrations
 

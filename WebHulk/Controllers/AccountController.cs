@@ -103,5 +103,10 @@ namespace WebHulk.Controllers
             return Redirect("/");
         }
 
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }
