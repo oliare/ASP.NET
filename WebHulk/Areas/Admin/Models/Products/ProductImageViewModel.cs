@@ -1,4 +1,4 @@
-﻿namespace WebHulk.Areas.Admin.Models.Products
+﻿namespace WebHulk.Models.Products
 {
     public class ProductImageViewModel
     {

@@ -24,4 +24,9 @@
     <None Include="wwwroot\images\input.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Models\Category\" />
+    <Folder Include="Areas\Admin\Views\Categories\" />
+  </ItemGroup>
+
 </Project>

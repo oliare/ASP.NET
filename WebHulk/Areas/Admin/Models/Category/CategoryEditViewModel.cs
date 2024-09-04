@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebHulk.Models.Categories
+namespace WebHulk.Areas.Admin.Models.Category
 {
     public class CategoryEditViewModel
     {

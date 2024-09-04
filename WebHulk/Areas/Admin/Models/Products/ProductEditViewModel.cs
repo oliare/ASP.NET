@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebHulk.Models.Products
+namespace WebHulk.Areas.Admin.Models.Products
 {
     public class ProductEditViewModel
     {
