@@ -1,5 +1,15 @@
 ﻿@model List<ProductItemViewModel>
 
+<div class="pagetitle">
+    <h1>Products</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Home</a></li>
+            <li class="breadcrumb-item">Components</li>
+            <li class="breadcrumb-item active">Products</li>
+        </ol>
+    </nav>
+</div>
 <div class="container mt-3 mb-5">
     <h2 class="text-center">Products</h2>
     <a asp-action="Create" asp-controller="Products" class="btn btn-secondary my-3">Add</a>
