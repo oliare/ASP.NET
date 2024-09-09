@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using WebHulk.Data;
 using WebHulk.Models.Products;
 using AutoMapper.QueryableExtensions;
-using WebHulk.Data.Entities;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 
 namespace WebHulk.Controllers
 {

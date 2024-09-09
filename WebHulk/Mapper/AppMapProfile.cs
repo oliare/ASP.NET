@@ -21,7 +21,7 @@ public class AppMapProfile : Profile
 
         CreateMap<Product, WebHulk.Areas.Admin.Models.Products.ProductItemViewModel>()
             .ForMember(x => x.Images, opt => opt.MapFrom(x => x.ProductImages.Select(p => p.Image).ToArray()));
-        
+
         CreateMap<Product, ProductEditViewModel>()
           .ForMember(x => x.Images, opt =>
           opt.MapFrom(src => src.ProductImages
@@ -38,7 +38,7 @@ public class AppMapProfile : Profile
             .ForMember(x => x.Price, opt => opt.MapFrom(x => Decimal.Parse(x.Price, new CultureInfo("uk-UA"))));
 
         CreateMap<UserEntity, ProfileViewModel>()
-            .ForMember(x=>x.FullName, opt=>opt.MapFrom(x=>$"{x.FirstName} {x.LastName}"));
+            .ForMember(x => x.FullName, opt => opt.MapFrom(x => $"{x.FirstName} {x.LastName}"));
 
     }
 }
