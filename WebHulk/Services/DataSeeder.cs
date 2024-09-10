@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Bogus;
+using Microsoft.AspNetCore.Identity;
+using System.Net;
 using System.Runtime.Intrinsics.X86;
 using WebHulk.Constants;
 using WebHulk.Data;
 using WebHulk.Data.Entities;
 using WebHulk.Data.Entities.Identity;
 using WebHulk.DATA.Entities;
+using WebHulk.Interfaces;
 
 namespace WebHulk.Services
 {
@@ -13,38 +16,73 @@ namespace WebHulk.Services
         private readonly HulkDbContext _context;
         private readonly UserManager<UserEntity> _userManager;
         private readonly RoleManager<RoleEntity> _roleManager;
+        private readonly IImageWorker _imageWorker;
 
-        public DataSeeder(HulkDbContext context, UserManager<UserEntity> userManager, RoleManager<RoleEntity> roleManager)
+        public DataSeeder(HulkDbContext context, UserManager<UserEntity> userManager,
+            RoleManager<RoleEntity> roleManager, IImageWorker imageWorker)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _imageWorker = imageWorker;
+
         }
 
         public void SeedProducts()
         {
             if (_context.Products.Count() == 0)
             {
-                var c1 = new CategoryEntity { Name = "Laptops", Image = "eb47fa37-007c-4d3e-be5e-a5ccb7600320.jpg" };
+                int number = 10;
+                var listCategories = new Faker().Commerce.Categories(number);
 
-                _context.Categories.Add(c1);
-                _context.SaveChanges();
+                string url = "https://picsum.photos/1200/800?category";
+                foreach (var categoryName in listCategories)
+                {
+                    var imgName = _imageWorker.ImageSave(url);
+                    if (!String.IsNullOrEmpty(imgName))
+                    {
+                        var catEntity = new CategoryEntity
+                        {
+                            Name = categoryName,
+                            Image = imgName,
+                        };
+                        _context.Add(catEntity);
+                        _context.SaveChanges();
+                    }
 
-                var p1 = new Product { Name = "Ноутбук HP EliteBook 840 G10", CategoryId = c1.Id, Price = 2350.00m };
-                var p2 = new Product { Name = "Ноутбук Dell Latitude 7640", CategoryId = c1.Id, Price = 2020.00m };
+                }
 
-                _context.Products.AddRange(p1, p2);
-                _context.ProductImages.AddRange(
-                    new ProductImage { Image = "p_1(1).webp", Product = p1 },
-                    new ProductImage { Image = "p_1(2).webp", Product = p1 },
-                    new ProductImage { Image = "p_1(3).webp", Product = p1 },
+                var categories = _context.Categories.ToList();
 
-                    new ProductImage { Image = "p_2(1).webp", Product = p2 },
-                    new ProductImage { Image = "p_2(2).webp", Product = p2 },
-                    new ProductImage { Image = "p_2(3).webp", Product = p2 }
-                );
+                var fakerProduct = new Faker<Product>()
+                    .RuleFor(u => u.Name, (f, u) => f.Commerce.Product())
+                    .RuleFor(u => u.Price, (f, u) => decimal.Parse(f.Commerce.Price()))
+                    .RuleFor(u => u.Category, (f, u) => f.PickRandom(categories));
 
-                _context.SaveChanges();
+                url = "https://picsum.photos/1200/800?product";
+
+                var products = fakerProduct.GenerateLazy(105);
+                Random r = new Random();
+
+                foreach (var product in products)
+                {
+                    _context.Add(product);
+                    _context.SaveChanges();
+                    int imageCount = r.Next(3, 5);
+                    for (int i = 0; i < imageCount; i++)
+                    {
+                        var imageName = _imageWorker.ImageSave(url);
+                        var imageProduct = new ProductImage
+                        {
+                            Product = product,
+                            Image = imageName,
+                            Priotity = i
+                        };
+                        _context.Add(imageProduct);
+                        _context.SaveChanges();
+                    }
+
+                }
             }
         }
 
@@ -86,5 +124,6 @@ namespace WebHulk.Services
             }
         }
 
+        
     }
 }

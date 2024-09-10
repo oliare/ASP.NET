@@ -21,7 +21,7 @@ namespace WebHulk.Areas.Admin.Controllers
             _context = context;
             _mapper = mapper;
         }
-
+      
         public IActionResult Index()
         {
             var categories = _context.Categories

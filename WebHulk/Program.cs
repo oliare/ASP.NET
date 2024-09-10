@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using WebHulk.Constants;
 using WebHulk.Data;
 using WebHulk.Data.Entities.Identity;
+using WebHulk.Interfaces;
 using WebHulk.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +15,7 @@ builder.Services.AddDbContext<HulkDbContext>(opt =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(typeof(AppMapProfile));
 builder.Services.AddScoped<DataSeeder>();
+builder.Services.AddScoped<IImageWorker, ImageWorker>();
 
 // Identity options
 builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
