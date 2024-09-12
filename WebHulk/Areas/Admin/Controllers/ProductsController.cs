@@ -54,7 +54,7 @@ namespace WebHulk.Areas.Admin.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var prod = new Product  
+            var prod = new Product
             {
                 Name = model.Name,
                 Price = model.Price,

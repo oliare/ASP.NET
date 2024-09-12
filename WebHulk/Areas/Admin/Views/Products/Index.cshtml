@@ -1,4 +1,10 @@
-﻿@model List<ProductItemViewModel>
+﻿@using System.Diagnostics;
+@model List<ProductItemViewModel>
+
+    @{
+    Stopwatch stopwatch = new Stopwatch();
+    stopwatch.Start();
+    }
 
 <div class="pagetitle">
     <h1>Products</h1>
@@ -82,3 +88,14 @@
     </div>
 </section>
     
+@{
+    stopwatch.Stop();
+    // Get the elapsed time as a TimeSpan value.
+    TimeSpan ts = stopwatch.Elapsed;
+
+    // Format and display the TimeSpan value.
+    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+        ts.Hours, ts.Minutes, ts.Seconds,
+        ts.Milliseconds / 10);
+    Console.WriteLine("RunTime ProductsController Index" + elapsedTime);
+}

@@ -49,7 +49,6 @@ namespace WebHulk.Services
                         _context.Add(catEntity);
                         _context.SaveChanges();
                     }
-
                 }
 
                 var categories = _context.Categories.ToList();
