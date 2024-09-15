@@ -10,7 +10,7 @@
     <h2 class="text-center mb-4">Products</h2>
 
     @await Html.PartialAsync("_ProductSearchItems", Model.Search)
-
+    
     <h5 class="mt-3 text-secondary">All records: @Model.Count</h5>
     @await Html.PartialAsync("_PaginationProducts", Model)
 
