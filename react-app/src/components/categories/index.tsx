@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import httpService from '../../api/http-service';
+import httpService, { BASE_URL } from '../../api/http-service';
 import { ICategoryItem } from '../../interfaces/categories';
+import { Link } from 'react-router-dom';
 
 const Categories: React.FC = () => {
   const [list, setList] = useState<ICategoryItem[]>([]);
@@ -16,15 +17,21 @@ const Categories: React.FC = () => {
         console.log("Error:", error);
       });
   }, []);
-
+  
   return (
     <>
-      <h1 className='text-center text-3xl font-bold mb-4 '>Categories</h1>
+      <p className='text-center text-3xl font-bold mb-5'>Categories</p>
+      <Link to={"/create"}>
+        <button className="mb-4 text-white font-bold bg-gray-500 hover:bg-gray-600 py-1 px-4 rounded">
+          Add
+        </button>
+      </Link>
+
       <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-4'>
         {list.map(x => (
           <div key={x.id} className='border rounded-lg overflow-hidden shadow-lg'>
             <img
-              src={`${httpService}/images/${x.image}`}
+             src={`${BASE_URL}/images/${x.image}`}
               alt={x.name}
               className='w-full h-48 object-cover'
             />
