@@ -1,6 +1,7 @@
 using ApiStore.Data;
 using ApiStore.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,8 +30,13 @@ app.UseCors(opt =>
     .AllowAnyOrigin());
 
 app.UseAuthorization();
-
 app.MapControllers();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "images")),
+    RequestPath = "/images"
+});
+
 
 using (var scope = app.Services.CreateScope())
 {
