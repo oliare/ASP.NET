@@ -1,4 +1,4 @@
-﻿namespace ApiStore.Models;
+﻿namespace ApiStore.Models.Category;
 
 public class CategoryCreateViewModel
 {

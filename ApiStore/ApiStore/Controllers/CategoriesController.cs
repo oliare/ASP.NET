@@ -1,13 +1,16 @@
 ﻿using ApiStore.Data;
 using ApiStore.Data.Entities;
-using ApiStore.Models;
+using ApiStore.Models.Category;
 using Microsoft.AspNetCore.Mvc;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
 
 namespace ApiStore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController(ApiStoreDbContext context) : ControllerBase
+    public class CategoriesController(ApiStoreDbContext context, IConfiguration configuration) : ControllerBase
     {
         [HttpGet]
         public IActionResult GetList()
@@ -17,28 +20,48 @@ namespace ApiStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromForm] CategoryCreateViewModel model)
+        public async Task<IActionResult> CreateAsync([FromForm] CategoryCreateViewModel model)
         {
             if (model == null) return BadRequest();
 
-            string ext = Path.GetExtension(model.Image.FileName);
-            string fname = Guid.NewGuid() + ext;
+            string fname = Guid.NewGuid().ToString() + ".webp";
+            var dir = configuration["ImagesDir"];
 
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "images", fname);
-            using (var stream = new FileStream(path, FileMode.Create))
-                 model.Image.CopyTo(stream);
-
-            var item = new CategoryEntity
+            using (MemoryStream ms = new())
             {
-                Name = model.Name,
-                Description = model.Description,
-                Image = fname
-            };
+                await model.Image.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                int[] sizes = [50, 150, 300, 600, 1200];
+                foreach (var size in sizes)
+                {
+                    string dirSave = Path.Combine(Directory.GetCurrentDirectory(),
+                        dir, $"{size}_{fname}");
+                    using (var image = Image.Load(bytes))
+                    {
+                        image.Mutate(x => x.Resize(new ResizeOptions
+                        {
+                            Size = new Size(size, size),
+                            Mode = ResizeMode.Max
+                        }));
+                        
+                        image.Save(dirSave, new WebpEncoder());
+                    }
+                }
+            }
 
-            context.Categories.Add(item);
-            context.SaveChanges();
+            //var item = new CategoryEntity
+            //{
+            //    Name = model.Name,
+            //    Description = model.Description,
+            //    Image = fname
+            //};
 
-            return Ok(item);
+            //context.Categories.Add(item);
+            //context.SaveChanges();
+
+            return Ok();
         }
+
+
     }
 }

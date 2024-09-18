@@ -1,5 +1,6 @@
 using ApiStore.Data;
 using ApiStore.Data.Entities;
+using ApiStore.Mapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -14,6 +15,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
+
+builder.Services.AddAutoMapper(typeof(AppMapProfile));
 
 var app = builder.Build();
 
@@ -31,12 +34,12 @@ app.UseCors(opt =>
 
 app.UseAuthorization();
 app.MapControllers();
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "images")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), builder.Configuration["ImagesDir"])),
     RequestPath = "/images"
 });
-
 
 using (var scope = app.Services.CreateScope())
 {
