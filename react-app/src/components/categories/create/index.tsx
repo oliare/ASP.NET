@@ -1,97 +1,71 @@
 import React, { useState } from 'react';
+import { httpService } from "../../../api/http-service";
+import { Form, Input, Button, Upload, Space } from 'antd';
+import type { UploadProps, UploadFile } from 'antd/es/upload';
 import { useNavigate } from 'react-router-dom';
-import httpService from "../../../api/http-service";
 
 const CategoryCreate: React.FC = () => {
-    const [values, setValues] = useState({
-        name: '',
-        description: '',
-        file: null as File | null
-    });
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
+    const [fileList, setFileList] = useState<UploadFile[]>([]); 
     const navigate = useNavigate();
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setValues(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        setValues(prev => ({ ...prev, file }));
-        if (file) {
-            setPreviewUrl(URL.createObjectURL(file));
-        } else {
-            setPreviewUrl(null);
+    const onFinish = async (values: any) => {
+        const formData = new FormData();
+        formData.append('name', values.name);
+        formData.append('description', values.description);
+        if (fileList.length > 0) 
+            formData.append('image', fileList[0].originFileObj as File);
+        try {
+            const response = await httpService.post("/api/categories", formData);
+            console.log("Category creation successful", response);
+            navigate("/");
+        } catch (error) {
+            console.log("Something went wrong during the category creation", error);
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const onChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+        setFileList(newFileList); 
+    };
 
-    const { name, description, file } = values;
-
-    if (!name || !description || !file) {
-        alert("Please fill all fields");
-        return;
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("description", description);
-        formData.append("image", file);
-
-        await httpService.post("/api/categories", formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
-        console.log("Category created");
-        navigate("/");
-    } catch {
-        alert('Smth went wrong...');
-    }
-};
-
-    const handleReset = () => {
-        setValues({ name: '', description: '', file: null });
-        setPreviewUrl(null);
+    const onPreview = async (file: UploadFile) => {
+        const src = file.url || URL.createObjectURL(file.originFileObj as File);
+        const imgWindow = window.open(src);
+        imgWindow?.document.write(` 
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                <img src="${src}" style="max-width: 100%;"/>
+            </div>`
+        );
     };
 
     return (
         <>
-            <p className="text-center text-3xl font-bold mb-5">Create Category</p>
-            <div className="max-w-lg mx-auto mt-10 p-6 rounded-lg shadow-md">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label htmlFor="name" className="font-medium">Name</label>
-                        <input id="name" name="name" type="text" value={values.name} onChange={handleInputChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
-                    </div>
-                    <div>
-                        <label htmlFor="description" className="font-medium">Description</label>
-                        <textarea id="description" name="description" value={values.description} onChange={handleInputChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" />
-                    </div>
-                    <div>
-                        <label htmlFor="file" className="block font-medium">Image</label>
-                        <input id="file" type="file" accept="image/*" onChange={handleFileChange} className="mt-2" />
-                        {previewUrl && (
-                            <img src={previewUrl} alt="Preview" className="mt-4 w-32 h-32 object-cover" />
-                        )}
-                    </div>
+            <p className="text-center text-3xl font-bold mb-7">Create Category</p>
+            <Form onFinish={onFinish} labelCol={{ span: 6 }} wrapperCol={{ span: 14 }}>
+                <Form.Item name="name" label="Name" hasFeedback
+                    rules={[{ required: true, message: 'Please provide a valid category name.' }]} >
+                    <Input placeholder='Type category name' />
+                </Form.Item>
 
-                    <div className="flex justify-center space-x-4">
-                        <button type="button" onClick={handleReset}
-                            className="inline-flex justify-center py-2 px-4 border text-sm font-medium rounded-md text-white bg-gray-500 hover:bg-gray-700">
-                            Reset
-                        </button>
-                        <button type="submit" className="inline-flex justify-center py-2 px-4 border text-sm font-medium rounded-md text-white bg-gray-500 hover:bg-gray-700">
-                            Create
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <Form.Item name="description" label="Description" hasFeedback
+                    rules={[{ required: true, message: 'Please enter some description.' }]} >
+                    <Input.TextArea placeholder='Type some description' rows={4} />
+                </Form.Item>
+
+                <Form.Item name="image" label="Image" hasFeedback
+                    rules={[{ required: true, message: "Please choose a photo for the category." }]} >
+                    <Upload listType="picture-card" fileList={fileList} maxCount={1}
+                        onChange={onChange} onPreview={onPreview}>
+                        {fileList.length <= 1 && '+ Upload'}
+                    </Upload>
+                </Form.Item>
+
+                <Form.Item wrapperCol={{ span: 10, offset: 10 }}>
+                    <Space>
+                        <Button htmlType="reset" className='text-white bg-gradient-to-br from-red-400 to-purple-600 font-medium rounded-lg px-5'>Reset</Button>
+                        <Button htmlType="submit" className='text-white bg-gradient-to-br from-green-400 to-blue-600 font-medium rounded-lg px-5'>Create</Button>
+                    </Space>
+                </Form.Item>
+            </Form>
         </>
     );
 }

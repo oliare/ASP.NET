@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import httpService, { BASE_URL } from '../../api/http-service';
+import { httpService, BASE_URL } from '../../api/http-service';
 import { ICategoryItem } from '../../interfaces/categories';
 import { Link } from 'react-router-dom';
 
-const Categories: React.FC = () => {
+const HomePage: React.FC = () => {
   const [list, setList] = useState<ICategoryItem[]>([]);
 
   useEffect(() => {
     httpService.get<ICategoryItem[]>("/api/Categories")
       .then(resp => {
-        const { data } = resp;
-        console.log("Success:", data);
-        setList(data);
+        console.log("Success:", resp);
+        setList(resp.data);
       })
       .catch(error => {
         console.log("Error:", error);
       });
   }, []);
-  
+
   return (
     <>
       <p className='text-center text-3xl font-bold mb-5'>Categories</p>
@@ -31,7 +30,7 @@ const Categories: React.FC = () => {
         {list.map(x => (
           <div key={x.id} className='border rounded-lg overflow-hidden shadow-lg'>
             <img
-             src={`${BASE_URL}/images/${x.image}`}
+              src={`${BASE_URL}/images/${x.image}`}
               alt={x.name}
               className='w-full h-48 object-cover'
             />
@@ -46,4 +45,4 @@ const Categories: React.FC = () => {
   );
 };
 
-export default Categories;
+export default HomePage;

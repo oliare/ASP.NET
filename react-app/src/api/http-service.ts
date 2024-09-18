@@ -1,12 +1,10 @@
 import axios from 'axios';
 
-export const BASE_URL: string = import.meta.env.VITE_API_URL as string;
+export const BASE_URL = import.meta.env.VITE_API_URL;
 
-const httpService = axios.create({
+export const httpService = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-type": "application/json"
   }
 });
-
-export default httpService;
