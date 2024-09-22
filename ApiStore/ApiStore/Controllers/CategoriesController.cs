@@ -1,18 +1,16 @@
 ﻿using ApiStore.Data;
 using ApiStore.Data.Entities;
+using ApiStore.Interfaces;
 using ApiStore.Models.Category;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing;
 
 namespace ApiStore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriesController(ApiStoreDbContext context,
-        IConfiguration configuration, IMapper mapper) : ControllerBase
+       IImageTool imageTool, IMapper mapper) : ControllerBase
     {
         [HttpGet]
         public IActionResult GetList()
@@ -28,7 +26,7 @@ namespace ApiStore.Controllers
 
             var item = mapper.Map<CategoryEntity>(model);
 
-            string fname = await SaveImageAsync(model.Image);
+            string fname = await imageTool.Save(model.Image);
             item.Image = fname;
 
             context.Categories.Add(item);
@@ -52,7 +50,7 @@ namespace ApiStore.Controllers
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "images", ctgr.Image);
                 if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
 
-                string fname = await SaveImageAsync(model.Image);
+                string fname = await imageTool.Save(model.Image);
                 ctgr.Image = fname;
             }
 
@@ -62,45 +60,17 @@ namespace ApiStore.Controllers
             return Ok(model);
         }
 
-        private async Task<string> SaveImageAsync(IFormFile imageFile)
-        {
-            string fname = Guid.NewGuid().ToString() + ".webp";
-            var dir = configuration["ImagesDir"];
-
-            using (MemoryStream ms = new())
-            {
-                await imageFile.CopyToAsync(ms);
-                var bytes = ms.ToArray();
-                int[] sizes = { 50, 150, 300, 600, 1200 };
-
-                foreach (var size in sizes)
-                {
-                    string dirSave = Path.Combine(Directory.GetCurrentDirectory(), dir, $"{size}_{fname}");
-                    using (var image = Image.Load(bytes))
-                    {
-                        image.Mutate(x => x.Resize(new ResizeOptions
-                        {
-                            Size = new Size(size, size),
-                            Mode = ResizeMode.Max
-                        }));
-
-                        image.Save(dirSave, new WebpEncoder());
-                    }
-                }
-            }
-            return fname;
-        }
-
-
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var ctgr = context.Categories.Find(id);
-            if (ctgr != null)
-            {
-                context.Categories.Remove(ctgr);
-                context.SaveChanges();
-            }
+            var ctgr = context.Categories.SingleOrDefault(x => x.Id == id);
+            if (ctgr == null) return NotFound();
+
+            if (!string.IsNullOrEmpty(ctgr.Image))
+                imageTool.Delete(ctgr.Image);
+
+            context.Categories.Remove(ctgr);
+            context.SaveChanges();
             return Ok();
         }
 

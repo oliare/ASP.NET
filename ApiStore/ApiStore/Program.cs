@@ -1,5 +1,6 @@
 using ApiStore.Data;
 using ApiStore.Data.Entities;
+using ApiStore.Interfaces;
 using ApiStore.Mapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -17,6 +18,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 
 builder.Services.AddAutoMapper(typeof(AppMapProfile));
+builder.Services.AddScoped<IImageTool, ImageHulk>();
 
 var app = builder.Build();
 
