@@ -1,23 +1,29 @@
 import { useState, useEffect } from "react";
-import { Button, Form, Input, Row, UploadFile } from "antd";
+import { Button, Form, Modal, Input, Row, Upload, UploadFile } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { ICategoryEdit } from "../../../interfaces/categories/index";
+import { ICategoryEdit, IUploadedFile } from "../../../interfaces/categories/index";
 import { httpService, BASE_URL } from '../../../api/http-service';
+import { RcFile, UploadChangeParam } from "antd/es/upload";
 import Loader from '../../common/loader/Loader';
-import ImageUpload from "../../common/imageUpload/ImageUpload";
+import { PlusOutlined } from '@ant-design/icons';
+
 
 const CategoryEditPage: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [form] = Form.useForm<ICategoryEdit>();
-    const [file, setFile] = useState<UploadFile[]>([]);
+    const [file, setFile] = useState<UploadFile | null>();
     const [loading, setLoading] = useState<boolean>(false);
+
+    const [previewOpen, setPreviewOpen] = useState<boolean>(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [previewTitle, setPreviewTitle] = useState('');
 
     const onSubmit = async (values: ICategoryEdit) => {
         setLoading(true);
         try {
             const resp = await httpService.put<ICategoryEdit>("/api/categories",
-                { ...values, id }, 
+                { ...values, id, Image: file },
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
             console.log("Update category", resp.data);
@@ -37,12 +43,12 @@ const CategoryEditPage: React.FC = () => {
                     const { data } = resp;
                     form.setFieldsValue(data);
                     if (data.image != null) {
-                        setFile([{
+                        setFile({
                             uid: '-1',
                             name: data.name,
                             status: "done",
                             url: `${BASE_URL}/images/300_${data.image}`
-                        }]);
+                        });
                     }
                 });
         } catch (error) {
@@ -70,9 +76,37 @@ const CategoryEditPage: React.FC = () => {
                             <Input.TextArea placeholder='Type some description' rows={4} />
                         </Form.Item>
 
-                        <Form.Item name="image" label="Image" hasFeedback>
-                                <ImageUpload file={file} setFile={setFile} />
+                        <div className="flex items-center col-span-2 gap-x-2">
+                            <Form.Item name="image" label="Фото" valuePropName="image"
+                                getValueFromEvent={(e: UploadChangeParam) => {
+                                    const image = e?.fileList[0] as IUploadedFile;
+                                    return image?.originFileObj;
+                                }}>
+                                <Upload
+                                    beforeUpload={() => false}
+                                    accept="image/*"
+                                    onPreview={(file: UploadFile) => {
+                                        if (!file.url && !file.preview) {
+                                            file.preview = URL.createObjectURL(file.originFileObj as RcFile);
+                                        }
+
+                                        setPreviewImage(file.url || (file.preview as string));
+                                        setPreviewOpen(true);
+                                        setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1));
+                                    }}
+                                    fileList={file ? [file] : []}
+                                    onChange={(data) => {
+                                        setFile(data.fileList[0]);
+                                    }}
+                                    listType="picture-card"
+                                    maxCount={1}>
+                                    <div>
+                                        <PlusOutlined />
+                                        <div style={{ marginTop: 8 }}>Upload</div>
+                                    </div>
+                                </Upload>
                             </Form.Item>
+                        </div>
 
                         <Form.Item wrapperCol={{ span: 10, offset: 10 }}>
                             <Row>
@@ -81,6 +115,10 @@ const CategoryEditPage: React.FC = () => {
                             </Row>
                         </Form.Item>
                     </Form>
+
+                    <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={() => setPreviewOpen(false)}>
+                        <img alt="example" style={{ width: '100%' }} src={previewImage} />
+                    </Modal>
                 </>
             )}
         </>

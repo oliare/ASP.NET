@@ -36,7 +36,7 @@ const HomePage = () => {
       <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-4'>
         {list.map(x =>
           <div key={x.id} className='border rounded-lg overflow-hidden shadow-lg'>
-            <img src={`${BASE_URL}/images/${x.image}`} alt={x.name} className='w-full h-48 object-cover' />
+            <img src={`${BASE_URL}/images/300_${x.image}`} alt={x.name} className='w-full h-48 object-cover' />
             <div className='p-4'>
               <h3 className='text-xl font-semibold mb-2'>{x.name}</h3>
               <p className='text-gray-700'>{x.description}</p>
