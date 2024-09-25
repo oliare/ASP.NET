@@ -3,6 +3,7 @@ using ApiStore.Data.Entities;
 using ApiStore.Interfaces;
 using ApiStore.Models.Category;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiStore.Controllers
@@ -15,23 +16,20 @@ namespace ApiStore.Controllers
         [HttpGet]
         public IActionResult GetList()
         {
-            var list = context.Categories.ToList();
+            var list = context.Categories
+                .ProjectTo<CategoryItemViewModel>(mapper.ConfigurationProvider)
+                .ToList();
             return Ok(list);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromForm] CategoryCreateViewModel model)
+        public async Task<IActionResult> Create([FromForm] CategoryCreateViewModel model)
         {
-            if (model == null) return BadRequest();
-
-            var item = mapper.Map<CategoryEntity>(model);
-
-            string fname = await imageTool.Save(model.Image);
-            item.Image = fname;
-
-            context.Categories.Add(item);
+            var imageName = await imageTool.Save(model.Image);
+            var entity = mapper.Map<CategoryEntity>(model);
+            entity.Image = imageName;
+            context.Categories.Add(entity);
             context.SaveChanges();
-
             return Ok();
         }
 
@@ -39,25 +37,25 @@ namespace ApiStore.Controllers
         public async Task<IActionResult> Edit([FromForm] CategoryEditViewModel model)
         {
             if (model == null) return NotFound();
-
-            var ctgr = context.Categories.Find(model.Id);
-
-            ctgr.Name = model.Name;
-            ctgr.Description = model.Description;
-
+            var category = context.Categories.SingleOrDefault(x => x.Id == model.Id);
+            category = mapper.Map(model, category);
             if (model.Image != null)
             {
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "images", ctgr.Image);
-                if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
-
+                imageTool.Delete(category.Image);
                 string fname = await imageTool.Save(model.Image);
-                ctgr.Image = fname;
+                category.Image = fname;
             }
-
-            context.Categories.Update(ctgr);
             context.SaveChanges();
+            return Ok();
+        }
 
-            return Ok(model);
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var list = context.Categories
+                .ProjectTo<CategoryItemViewModel>(mapper.ConfigurationProvider)
+                .SingleOrDefault(x => x.Id == id);
+            return Ok(list);
         }
 
         [HttpDelete("{id}")]

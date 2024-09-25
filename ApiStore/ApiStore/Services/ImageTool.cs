@@ -5,18 +5,17 @@ using SixLabors.ImageSharp.Processing;
 
 public class ImageHulk(IConfiguration configuration) : IImageTool
 {
-    public bool Delete(string file)
+    public bool Delete(string fileName)
     {
         try
         {
             var dir = configuration["ImagesDir"];
-            var sizes = configuration["ImageSizes"].Split(",")
-                .Select(x => int.Parse(x));
-
+            var sizes = configuration["ImagesSizes"].Split(",")
+                .Select(int.Parse);
             foreach (var size in sizes)
             {
                 string dirSave = Path.Combine(Directory.GetCurrentDirectory(),
-                    dir, $"{size}_{file}");
+                    dir, $"{size}_{fileName}");
 
                 if (File.Exists(dirSave)) File.Delete(dirSave);
             }
@@ -37,13 +36,12 @@ public class ImageHulk(IConfiguration configuration) : IImageTool
         {
             await image.CopyToAsync(ms);
             var bytes = ms.ToArray();
-            var sizes = configuration["ImageSizes"].Split(",")
-                .Select(x => int.Parse(x));
-
-            foreach (var size in sizes)
+            var sizes = configuration["ImagesSizes"];
+            var test = sizes.Split(",")
+                .Select(int.Parse);
+            foreach (var size in test)
             {
-                string dirSave = Path.Combine(Directory.GetCurrentDirectory(),
-                    dir, $"{size}_{imageName}");
+                string dirSave = Path.Combine(Directory.GetCurrentDirectory(), dir, $"{size}_{imageName}");
                 using (var imageLoad = Image.Load(bytes))
                 {
                     imageLoad.Mutate(x => x.Resize(new ResizeOptions
@@ -56,7 +54,6 @@ public class ImageHulk(IConfiguration configuration) : IImageTool
                 }
             }
         }
-
         return imageName;
     }
 

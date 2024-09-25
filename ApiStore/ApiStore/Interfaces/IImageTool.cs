@@ -3,6 +3,6 @@
     public interface IImageTool
     {
         Task<string> Save(IFormFile image);
-        bool Delete(string file);
+        bool Delete(string fileName);
     }
 }
