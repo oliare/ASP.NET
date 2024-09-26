@@ -14,8 +14,7 @@ namespace ApiStore.Mapper
             CreateMap<CategoryEditViewModel, CategoryEntity>()
                 .ForMember(x => x.Image, opt => opt.Ignore());
 
-            CreateMap<CategoryEntity, CategoryItemViewModel>()
-                .ForMember(x => x.Image, opt => opt.Ignore());
+            CreateMap<CategoryEntity, CategoryItemViewModel>();
 
         }
     }
