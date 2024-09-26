@@ -1,10 +1,10 @@
 import React from 'react';
-import { Spin } from 'antd';
+import './Loader.css';
 
 const Loader: React.FC = () => {
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <Spin />
+        <div className="loader-overlay">
+            <div className="loader"></div>
         </div>
     );
 };
