@@ -2,6 +2,7 @@ using ApiStore.Data;
 using ApiStore.Data.Entities;
 using ApiStore.Interfaces;
 using ApiStore.Mapper;
+using ApiStore.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -18,7 +19,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 
 builder.Services.AddAutoMapper(typeof(AppMapProfile));
-builder.Services.AddScoped<IImageTool, ImageHulk>();
+builder.Services.AddScoped<IImageTool, ImageTool>();
+builder.Services.AddScoped<DataSeeder>();
 
 var app = builder.Build();
 
@@ -49,17 +51,8 @@ using (var scope = app.Services.CreateScope())
     //dbContext.Database.EnsureDeleted();
     dbContext.Database.Migrate();
 
-    if (dbContext.Categories.Count() == 0)
-    {
-        var cat = new CategoryEntity()
-        {
-            Name = "Dogs",
-            Description = "Dogs of different types",
-            Image = "dog.jpg"
-        };
-        dbContext.Categories.Add(cat);
-        dbContext.SaveChanges();
-    }
+    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    await seeder.SeedData();
 }
 
 app.Run();

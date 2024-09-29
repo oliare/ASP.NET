@@ -3,7 +3,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
-public class ImageHulk(IConfiguration configuration) : IImageTool
+public class ImageTool(IConfiguration configuration) : IImageTool
 {
     public bool Delete(string fileName)
     {
@@ -36,25 +36,51 @@ public class ImageHulk(IConfiguration configuration) : IImageTool
         {
             await image.CopyToAsync(ms);
             var bytes = ms.ToArray();
-            var sizes = configuration["ImagesSizes"];
-            var test = sizes.Split(",")
-                .Select(int.Parse);
-            foreach (var size in test)
-            {
-                string dirSave = Path.Combine(Directory.GetCurrentDirectory(), dir, $"{size}_{imageName}");
-                using (var imageLoad = Image.Load(bytes))
-                {
-                    imageLoad.Mutate(x => x.Resize(new ResizeOptions
-                    {
-                        Size = new Size(size, size),
-                        Mode = ResizeMode.Max
-                    }));
+            await SpecifyImageSize(bytes, imageName);
+        }
 
-                    imageLoad.Save(dirSave, new WebpEncoder());
-                }
+        return imageName;
+    }
+
+    public async Task<string> SaveImageByUrl(string url)
+    {
+        using (var httpClient = new HttpClient())
+        {
+            var bytes = await httpClient.GetByteArrayAsync(url);
+            string fname = Guid.NewGuid().ToString() + ".webp";
+            var dir = configuration["ImagesDir"];
+
+            string dirSave = Path.Combine(Directory.GetCurrentDirectory(), dir, fname);
+
+            using (var image = Image.Load(bytes))
+            {
+                image.Save(dirSave, new WebpEncoder());
+            }
+
+            return fname;
+        }
+    }
+
+    private async Task SpecifyImageSize(byte[] bytes, string imageName)
+    {
+        var dir = configuration["ImagesDir"];
+        var sizes = configuration["ImagesSizes"].Split(",")
+                .Select(int.Parse);
+
+        foreach (var size in sizes)
+        {
+            string dirSave = Path.Combine(Directory.GetCurrentDirectory(), dir, $"{size}_{imageName}");
+            using (var imageLoad = Image.Load(bytes))
+            {
+                imageLoad.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Size = new Size(size, size),
+                    Mode = ResizeMode.Max
+                }));
+
+                await Task.Run(() => imageLoad.Save(dirSave, new WebpEncoder()));
             }
         }
-        return imageName;
     }
 
 }
