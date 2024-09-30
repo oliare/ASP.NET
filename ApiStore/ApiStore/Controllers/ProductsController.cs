@@ -21,7 +21,7 @@ namespace ApiStore.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProductCreateViewModel model)
+        public async Task<IActionResult> Create([FromForm] ProductCreateViewModel model)
         {
             var entity = mapper.Map<ProductEntity>(model);
             context.Products.Add(entity);
