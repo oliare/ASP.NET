@@ -18,7 +18,7 @@ const HomePage = () => {
     try {
       httpService.delete(`/api/categories/` + id);
       setList(list.filter(i => i.id != id));
-      console.log("Delete id", id);
+      console.log(`The category with id ${id} has been deleted`);
     } catch (error) {
       console.log("Error: ", error);
     }
@@ -33,10 +33,12 @@ const HomePage = () => {
         </button>
       </Link>
 
-      <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-4'>
+      <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-6'>
         {list.map(x =>
           <div key={x.id} className='border rounded-lg overflow-hidden shadow-lg'>
-            <img src={`${BASE_URL}/images/${x.image}`} alt={x.name} className='w-full h-48 object-cover' />
+            <img src={`${BASE_URL}/images/${x.image}`}
+              onError={(e) => { (e.currentTarget.src = `${BASE_URL}/images/1200_${x.image}`) }}
+              alt={x.name} className='w-full h-48 object-cover' />
             <div className='p-4'>
               <h3 className='text-xl font-semibold mb-2'>{x.name}</h3>
               <p className='text-gray-700'>{x.description}</p>

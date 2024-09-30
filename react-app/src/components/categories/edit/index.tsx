@@ -20,7 +20,6 @@ const CategoryEditPage: React.FC = () => {
 
     const onSubmit = async (values: ICategoryEdit) => {
         setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 5000));
         try {
             const resp = await httpService.put<ICategoryEdit>("/api/categories",
                 { ...values, id, Image: file },
@@ -108,7 +107,7 @@ const CategoryEditPage: React.FC = () => {
                                 <Link to={"/"}>
                                     <Button htmlType="button" className='text-white bg-gradient-to-br from-red-400 to-purple-600 font-medium rounded-lg px-5'>Cancel</Button>
                                 </Link>
-                                <Button htmlType="submit" className='text-white bg-gradient-to-br from-green-400 to-blue-600 font-medium rounded-lg px-5'>Create</Button>
+                                <Button htmlType="submit" className='text-white bg-gradient-to-br from-green-400 to-blue-600 font-medium rounded-lg px-5'>Update</Button>
                             </Space>
                         </Form.Item>
                     </Form>

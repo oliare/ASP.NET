@@ -4,9 +4,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { httpService } from '../../../api/http-service';
 import { RcFile, UploadChangeParam } from "antd/es/upload";
 import { PlusOutlined } from '@ant-design/icons';
-import { IProductCreate, IProductItem } from '../../../interfaces/products';
+import { IProductCreate } from '../../../interfaces/products';
 import Loader from '../../common/loader/Loader';
-import { ICategoryItem, ICategoryList, IUploadedFile } from '../../../interfaces/categories';
+import { ICategoryItem, ICategoryName } from '../../../interfaces/categories';
 
 const ProductCreatePage = () => {
 
@@ -14,7 +14,7 @@ const ProductCreatePage = () => {
     const [form] = Form.useForm<IProductCreate>();
     const [loading, setLoading] = useState<boolean>(false);
 
-    const [categories, setCategories] = useState<ICategoryList[]>([]);
+    const [categories, setCategories] = useState<ICategoryName[]>([]);
     const [previewOpen, setPreviewOpen] = useState<boolean>(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { httpService, BASE_URL } from '../../../api/http-service';
 import { IProductItem } from '../../../interfaces/products';
 import { Link } from 'react-router-dom';
-import { Button } from 'antd';
+import { Button, Carousel } from 'antd';
 import { PlusCircleFilled } from '@ant-design/icons';
 
 const ProductListPage = () => {
@@ -23,12 +23,18 @@ const ProductListPage = () => {
             </Link>
 
             <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-10'>
-                {list.map(i =>
-                    <div key={i.id} className='border rounded-lg overflow-hidden shadow-lg'>
-                        <img src={`${BASE_URL}/images/${i.images[0]}`} alt={i.name} className='w-full h-48 object-cover' />
+                {list.map(item =>
+                    <div key={item.id} className='border rounded-lg overflow-hidden shadow-lg'>
+                        <Carousel arrows infinite={false}>
+                            {item.images.map((image, i) => (
+                                <div key={i}>
+                                    <img src={`${BASE_URL}/images/${image}`} alt={item.name} className='w-full h-48 object-cover' />
+                                </div>
+                            ))}
+                        </Carousel>
                         <div className='p-4'>
-                            <h3 className='text-xl font-semibold mb-2'>{i.name}</h3>
-                            <p className='text-gray-700'>{i.price}</p>
+                            <h3 className='text-xl font-semibold mb-2'>{item.name}</h3>
+                            <p className='text-teal-800 font-bold text-xl'>{item.price}<span className='text-sm'>$</span></p>
                         </div>
                     </div>
                 )}

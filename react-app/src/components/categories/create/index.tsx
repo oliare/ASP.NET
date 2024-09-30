@@ -4,25 +4,25 @@ import { useNavigate, Link } from 'react-router-dom';
 import { httpService } from '../../../api/http-service';
 import { RcFile, UploadChangeParam } from "antd/es/upload";
 import { PlusOutlined } from '@ant-design/icons';
-import { ICategoryItem, IUploadedFile } from '../../../interfaces/categories';
+import { ICategoryCreate, IUploadedFile } from '../../../interfaces/categories';
 import Loader from '../../common/loader/Loader';
 
 const CategoryCreatePage = () => {
 
     const navigate = useNavigate();
-    const [form] = Form.useForm<ICategoryItem>();
+    const [form] = Form.useForm<ICategoryCreate>();
     const [loading, setLoading] = useState<boolean>(false);
 
     const [previewOpen, setPreviewOpen] = useState<boolean>(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
 
-    const onSubmit = async (values: ICategoryItem) => {
+    const onSubmit = async (values: ICategoryCreate) => {
         setLoading(true);
         try {
             console.log("Send Data", values);
 
-            httpService.post<ICategoryItem>("/api/categories", values, {
+            httpService.post<ICategoryCreate>("/api/categories", values, {
                 headers: { "Content-Type": "multipart/form-data" }
             }).then(resp => {
                 console.log("Create category", resp.data);
