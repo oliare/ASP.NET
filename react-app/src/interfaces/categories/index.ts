@@ -10,6 +10,10 @@ export interface ICategoryEdit {
     description: string;
     image: string;
 }
+export interface ICategoryList {
+    id: number;
+    name: string;
+}
 export interface IUploadedFile {
     preview: any;
     url: any;
