@@ -5,6 +5,7 @@ using ApiStore.Models.Category;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiStore.Controllers
 {
@@ -70,6 +71,15 @@ namespace ApiStore.Controllers
             context.Categories.Remove(ctgr);
             context.SaveChanges();
             return Ok();
+        }
+
+        [HttpGet("names")]
+        public async Task<IActionResult> GetCategoriesNames()
+        {
+            var result = await context.Categories
+            .ProjectTo<SelectItemViewModel>(mapper.ConfigurationProvider)
+            .ToListAsync();
+            return Ok(result);
         }
 
     }
