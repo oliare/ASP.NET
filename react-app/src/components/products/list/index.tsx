@@ -3,7 +3,8 @@ import { httpService, BASE_URL } from '../../../api/http-service';
 import { IProductItem } from '../../../interfaces/products';
 import { Link } from 'react-router-dom';
 import { Button, Carousel } from 'antd';
-import { PlusCircleFilled } from '@ant-design/icons';
+import { PlusCircleFilled, EditOutlined } from '@ant-design/icons';
+import { DeleteDialog } from '../../common/deleteModal/DeleteDialog';
 
 const ProductListPage = () => {
     const [list, setList] = useState<IProductItem[]>([]);
@@ -14,6 +15,16 @@ const ProductListPage = () => {
                 setList(resp.data);
             });
     }, []);
+
+    const handleDelete = (id: number) => {
+        try {
+            httpService.delete(`/api/products/${id}`);
+            setList(list.filter(i => i.id != id))
+            console.log(`The product with id ${id} has been deleted`);
+        } catch (error) {
+            console.log("Product deletion error: ", error);
+        }
+    }
 
     return (
         <>
@@ -36,8 +47,19 @@ const ProductListPage = () => {
                             <h3 className='text-xl font-semibold mb-2'>{item.name}</h3>
                             <p className='text-teal-800 font-bold text-xl'>{item.price}<span className='text-sm'>$</span></p>
                         </div>
+
+                        <div className='flex justify-between items-center p-2 m-2'>
+                            <Link to={`/products/edit/${item.id}`} className="text-black-500 hover:text-purple-700">
+                                <EditOutlined />
+                            </Link>
+                            <DeleteDialog title={"Notification"}
+                                description={`Are you sure you want to delete '${item.name}'?`}
+                                onSubmit={() => handleDelete(item.id)}>
+                            </DeleteDialog>
+                        </div>
                     </div>
                 )}
+
             </div>
         </>
     );

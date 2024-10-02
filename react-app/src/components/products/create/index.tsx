@@ -20,7 +20,7 @@ const ProductCreatePage = () => {
     const [previewTitle, setPreviewTitle] = useState('');
 
     useEffect(() => {
-        httpService.get<ICategoryItem[]>("/api/Categories")
+        httpService.get<ICategoryItem[]>("/api/Categories/names")
             .then(resp => {
                 setCategories(resp.data);
             });
