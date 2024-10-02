@@ -95,7 +95,10 @@ namespace ApiStore.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var product = context.Products.SingleOrDefault(x => x.Id == id);
+            var product = context.Products
+                .Include(x => x.ProductImages)
+                .SingleOrDefault(x => x.Id == id);
+            
             if (product == null) return NotFound();
 
             if (product.ProductImages != null)
