@@ -1,9 +1,11 @@
-﻿using ApiStore.Data;
+﻿using ApiStore.Constants;
+using ApiStore.Data;
 using ApiStore.Data.Entities;
+using ApiStore.Data.Entities.Identity;
 using ApiStore.Interfaces;
 using Bogus;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace ApiStore.Services
 {
@@ -11,11 +13,15 @@ namespace ApiStore.Services
     {
         private readonly ApiStoreDbContext _context;
         private readonly IImageTool _imageTool;
-
-        public DataSeeder(ApiStoreDbContext context, IImageTool imageTool)
+        private readonly UserManager<UserEntity> _userManager;
+        private readonly RoleManager<RoleEntity> _roleManager;
+        public DataSeeder(ApiStoreDbContext context, IImageTool imageTool, UserManager<UserEntity> userManager,
+            RoleManager<RoleEntity> roleManager)
         {
             _context = context;
             _imageTool = imageTool;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task SeedCategories()
@@ -83,10 +89,53 @@ namespace ApiStore.Services
             _context.SaveChanges();
         }
 
+        public async Task SeedRoles()
+        {
+            if (_context.Roles.Count() == 0)
+            {
+                var roles = new[]
+                {
+                    new RoleEntity { Name = Roles.Admin },
+                    new RoleEntity { Name = Roles.User }
+                };
+
+                foreach (var role in roles)
+                {
+                    var outcome = _roleManager.CreateAsync(role).Result;
+                    if (!outcome.Succeeded) Console.WriteLine($"Failed to create role: {role.Name}");
+                }
+            }
+        }
+
+        public async Task SeedUsers()
+        {
+            if (_context.Users.Count() == 0)
+            {
+                var users = new[]
+                {
+                    new { User = new UserEntity { FirstName = "Tony", LastName = "Stark", UserName = "admin@gmail.com", Email = "admin@gmail.com" }, Password = "admin1", Role = Roles.Admin },
+                    new { User = new UserEntity { FirstName = "Boba", LastName = "Gray", UserName = "user@gmail.com", Email = "user@gmail.com" }, Password = "bobapass1", Role = Roles.User },
+                    new { User = new UserEntity { FirstName = "Biba", LastName = "Undefined", UserName = "biba@gmail.com", Email = "biba@gmail.com" }, Password = "bibapass3", Role = Roles.User }
+                };
+
+                foreach (var i in users)
+                {
+                    var outcome = _userManager.CreateAsync(i.User, i.Password).Result;
+
+                    if (!outcome.Succeeded)
+                        Console.WriteLine($"Failed to create user: {i.User.UserName}");
+                    else
+                        outcome = _userManager.AddToRoleAsync(i.User, i.Role).Result;
+                }
+            }
+        }
+
         public async Task SeedData()
         {
             await SeedCategories();
             await SeedProducts();
+            await SeedRoles();
+            await SeedUsers();
         }
 
     }
