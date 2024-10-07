@@ -1,4 +1,6 @@
-﻿namespace ApiStore.Models.Product;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace ApiStore.Models.Product;
 
 public class ProductEditViewModel
 {
@@ -6,12 +8,7 @@ public class ProductEditViewModel
     public string? Name { get; set; }
     public decimal Price { get; set; }
     public int CategoryId { get; set; }
-    public List<ProductImages>? PreviousImages { get; set; }
-    public List<ProductImages>? NewImages { get; set; }
-}
-
-public class ProductImages
-{
-    public IFormFile? Image { get; set; }
-    public int Priority { get; set; }
+    public List<ProductImageViewModel>? PreviousImages { get; set; }
+    public List<IFormFile>? NewImages { get; set; }
+    public List<int>? ImagesIds { get; set; }
 }

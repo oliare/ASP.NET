@@ -52,30 +52,49 @@ namespace ApiStore.Controllers
         [HttpPut]
         public async Task<IActionResult> Edit([FromForm] ProductEditViewModel model)
         {
-            var product = mapper.Map<ProductEntity>(model);
-            await context.SaveChangesAsync();
+            var product = await context.Products
+                .Include(p => p.ProductImages)
+                .FirstOrDefaultAsync(p => p.Id == model.Id);
 
-            var images = context.ProductImages.Where(x => x.ProductId == model.Id).ToList();
-            if (images != null)
+            mapper.Map(model, product);
+
+            if (model.PreviousImages != null)
             {
-                foreach (var img in images)
+                foreach (var prevImage in model.PreviousImages)
                 {
-                    if (!model.PreviousImages.Any(x => x.Image?.FileName == img.Image))
-                    {
-                        context.ProductImages.Remove(img);
-                        imageTool.Delete(img.Image);
-                    }
-                    else
-                        img.Priority = model.PreviousImages
-                            .SingleOrDefault(x => x.Image?.FileName == img.Image)?.Priority ?? img.Priority;
-                }
+                    var existingImage = product.ProductImages
+                        .FirstOrDefault(img => img.Id == prevImage.Id);
 
-                if (model.NewImages != null)
+                    if (existingImage != null)
+                        existingImage.Priority = prevImage.Priority;
+                }
+            }
+
+            if (model.ImagesIds != null)
+            {
+                var imagesToDelete = context.ProductImages
+                    .Where(img => model.ImagesIds.Contains(img.Id))
+                    .ToList();
+
+                foreach (var img in imagesToDelete)
                 {
-                    foreach (var img in model.NewImages)
+                    imageTool.Delete(img.Image);
+                    context.ProductImages.Remove(img);
+                }
+            }
+
+            if (model.NewImages != null)
+            {
+                foreach (var img in model.NewImages)
+                {
+                    if (img != null)
                     {
-                        var imagePath = await imageTool.Save(img.Image);
-                        context.ProductImages.Add(new ProductImageEntity { Image = imagePath, ProductId = product.Id, Priority = img.Priority });
+                        var imagePath = await imageTool.Save(img);
+                        context.ProductImages.Add(new ProductImageEntity
+                        {
+                            Image = imagePath,
+                            ProductId = product.Id,
+                        });
                     }
                 }
             }
@@ -87,7 +106,9 @@ namespace ApiStore.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            var product = await context.Products.SingleOrDefaultAsync(p => p.Id == id);
+            var product = await context.Products
+                .Include(x => x.ProductImages)
+                .SingleOrDefaultAsync(p => p.Id == id);
             if (product == null) return NotFound();
             return Ok(product);
         }
@@ -98,7 +119,7 @@ namespace ApiStore.Controllers
             var product = context.Products
                 .Include(x => x.ProductImages)
                 .SingleOrDefault(x => x.Id == id);
-            
+
             if (product == null) return NotFound();
 
             if (product.ProductImages != null)

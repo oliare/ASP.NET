@@ -1,27 +1,22 @@
 ﻿using ApiStore.Data.Entities.Identity;
 using ApiStore.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using SixLabors.ImageSharp;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace ApiStore.Services;
 
-public class JwtTokenService : IJwtTokenService
+public class JwtTokenService(IConfiguration _configuration,
+        UserManager<UserEntity> userManager) : IJwtTokenService
 {
-    private readonly IConfiguration _configuration;
-    public JwtTokenService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
-    public string GenerateToken(UserEntity user)
+    public async Task<string> GenerateToken(UserEntity user)
     {
         var key = Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Jwt:Key"));
         var securityKey = new SymmetricSecurityKey(key);
-
-        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
+        
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, $"{user.LastName} {user.FirstName}"),
@@ -29,6 +24,14 @@ public class JwtTokenService : IJwtTokenService
             new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
             new Claim(ClaimTypes.Role, user.UserRoles.FirstOrDefault()?.Role.Name ?? "User")
         };
+
+        var roles = await userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+            claims.Add(new Claim("roles", role));
+
+        var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+       
 
         var jwt = new JwtSecurityToken(
             signingCredentials: creds,

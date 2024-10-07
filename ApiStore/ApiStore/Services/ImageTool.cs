@@ -29,14 +29,14 @@ public class ImageTool(IConfiguration configuration) : IImageTool
 
     public async Task<string> Save(IFormFile image)
     {
-        string imageName = Guid.NewGuid().ToString() + ".webp";
+        string imageName = String.Empty;
         var dir = configuration["ImagesDir"];
 
         using (MemoryStream ms = new())
         {
             await image.CopyToAsync(ms);
             var bytes = ms.ToArray();
-            await SpecifyImageSize(bytes, imageName);
+            imageName = SaveByImageSize(bytes);
         }
 
         return imageName;
@@ -44,25 +44,23 @@ public class ImageTool(IConfiguration configuration) : IImageTool
 
     public async Task<string> SaveImageByUrl(string url)
     {
-        using (var httpClient = new HttpClient())
+        string fname = String.Empty;
+        using (var client = new HttpClient())
         {
-            var bytes = await httpClient.GetByteArrayAsync(url);
-            string fname = Guid.NewGuid().ToString() + ".webp";
-            var dir = configuration["ImagesDir"];
-
-            string dirSave = Path.Combine(Directory.GetCurrentDirectory(), dir, fname);
-
-            using (var image = Image.Load(bytes))
+            HttpResponseMessage response = client.GetAsync(url).Result;
+            if (response.IsSuccessStatusCode)
             {
-                image.Save(dirSave, new WebpEncoder());
+                byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
+                fname = SaveByImageSize(imageBytes);
             }
-
-            return fname;
         }
+        return fname;
     }
 
-    private async Task SpecifyImageSize(byte[] bytes, string imageName)
+    private string SaveByImageSize(byte[] bytes)
     {
+        string imageName = Guid.NewGuid().ToString() + ".webp";
+
         var dir = configuration["ImagesDir"];
         var sizes = configuration["ImagesSizes"].Split(",")
                 .Select(int.Parse);
@@ -78,9 +76,10 @@ public class ImageTool(IConfiguration configuration) : IImageTool
                     Mode = ResizeMode.Max
                 }));
 
-                await Task.Run(() => imageLoad.Save(dirSave, new WebpEncoder()));
+                imageLoad.Save(dirSave, new WebpEncoder());
             }
         }
+        return imageName;
     }
 
 }

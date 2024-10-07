@@ -21,14 +21,22 @@ namespace ApiStore.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
 
-            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
-                return Unauthorized("Invalid data");
+                if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+                    return Unauthorized("Invalid data");
 
-            var token = _jwtTokenService.GenerateToken(user);
-            return Ok(new { token });
+                var token = _jwtTokenService.GenerateToken(user);
+                return Ok(new { token });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+
     }
 
 }
