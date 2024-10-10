@@ -1,33 +1,73 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import {Outlet} from "react-router-dom";
+import { useNavigate, Link, Outlet } from "react-router-dom";
+import defaultIcon from '../../../assets/default_avatar.jpg';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginSuccess, logoutSuccess } from '../../auth/authSlice';
+import { RootState } from '../../store';
+import { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
-const user = {
-    name: 'Tom Cook',
-    email: 'tom@example.com',
-    imageUrl:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-}
 const navigation = [
     { name: 'Dashboard', href: '/', current: true },
-    { name: 'Categories', href: '/', current: false },
+    { name: 'Categories', href: '/categories', current: false },
     { name: 'Products', href: '/products', current: false },
     { name: 'Projects', href: '#', current: false },
     { name: 'Calendar', href: '#', current: false },
     { name: 'Reports', href: '#', current: false },
-]
-const userNavigation = [
-    { name: 'Your Profile', href: '#' },
-    { name: 'Settings', href: '#' },
-    { name: 'Sign out', href: '#' },
-]
-
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
-}
+];
 
 
 const MainLayout = () => {
+
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const user = useSelector((state: RootState) => state.auth.user);
+
+    const handleLogout = (value: string) => {
+        if (value != "Sign out") return;
+        localStorage.removeItem('accesstoken');
+
+        dispatch(logoutSuccess());
+        navigate('/auth/login');
+    };
+    interface IUserLoginInfo {
+        name: string,
+        email: string
+    }
+
+    const [userNavigation, setUserNavigation] = useState<{ name: string; href: string; }[]>([]);
+    useEffect(() => {
+        console.log(!!user?.firstName);
+        const navigation = user?.firstName ? [
+            { name: 'Profile', href: '/profile' },
+            { name: 'Sign out', href: '#' },
+        ] : [
+            { name: 'Login', href: '/auth/login' },
+            { name: 'Register', href: '/auth/register' },
+        ];
+        setUserNavigation(navigation);
+    }, [user])
+
+    useEffect(() => {
+        console.log("test")
+        const accesstoken = localStorage.getItem("accesstoken");
+
+        if (accesstoken) {
+            const user: IUserLoginInfo = jwtDecode<IUserLoginInfo>(accesstoken);
+            console.log("USER:", user);
+            dispatch(loginSuccess({
+                firstName: user.email,
+                lastName: user.name,
+            }));
+        }
+
+    }, [])
+
+    function classNames(...classes: any[]) {
+            return classes.filter(Boolean).join(' ');
+        }
+
     return (
         <>
             <div className="min-h-full">
@@ -45,9 +85,9 @@ const MainLayout = () => {
                                 <div className="hidden md:block">
                                     <div className="ml-10 flex items-baseline space-x-4">
                                         {navigation.map((item) => (
-                                            <a
+                                            <Link
                                                 key={item.name}
-                                                href={item.href}
+                                                to={item.href}
                                                 aria-current={item.current ? 'page' : undefined}
                                                 className={classNames(
                                                     item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
@@ -55,7 +95,7 @@ const MainLayout = () => {
                                                 )}
                                             >
                                                 {item.name}
-                                            </a>
+                                            </Link>
                                         ))}
                                     </div>
                                 </div>
@@ -77,7 +117,7 @@ const MainLayout = () => {
                                             <MenuButton className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                                                 <span className="absolute -inset-1.5" />
                                                 <span className="sr-only">Open user menu</span>
-                                                <img alt="" src={user.imageUrl} className="h-8 w-8 rounded-full" />
+                                                <img alt="" src={user?.image} className="h-8 w-8 rounded-full" />
                                             </MenuButton>
                                         </div>
                                         <MenuItems
@@ -86,12 +126,13 @@ const MainLayout = () => {
                                         >
                                             {userNavigation.map((item) => (
                                                 <MenuItem key={item.name}>
-                                                    <a
-                                                        href={item.href}
+                                                    <Link
+                                                        onClick={() => { handleLogout(item.name) }}
+                                                        to={item.href}
                                                         className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                                                     >
                                                         {item.name}
-                                                    </a>
+                                                    </Link>
                                                 </MenuItem>
                                             ))}
                                         </MenuItems>
@@ -130,11 +171,11 @@ const MainLayout = () => {
                         <div className="border-t border-gray-700 pb-3 pt-4">
                             <div className="flex items-center px-5">
                                 <div className="flex-shrink-0">
-                                    <img alt="" src={user.imageUrl} className="h-10 w-10 rounded-full" />
+                                    <img alt="" src={user?.image} className="h-10 w-10 rounded-full" />
                                 </div>
                                 <div className="ml-3">
-                                    <div className="text-base font-medium leading-none text-white">{user.name}</div>
-                                    <div className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
+                                    <div className="text-base font-medium leading-none text-white">{user?.firstName}</div>
+                                    <div className="text-sm font-medium leading-none text-gray-400">{user?.lastName}</div>
                                 </div>
                                 <button
                                     type="button"
@@ -161,10 +202,10 @@ const MainLayout = () => {
                     </DisclosurePanel>
                 </Disclosure>
 
-               <main>
+                <main>
                     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
-                        <Outlet/>
+                        <Outlet />
                         {/* Your content */}
                     </div>
                 </main>
@@ -172,5 +213,4 @@ const MainLayout = () => {
         </>
     )
 }
-
 export default MainLayout;

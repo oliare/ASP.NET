@@ -19,10 +19,10 @@ public class JwtTokenService(IConfiguration _configuration,
         
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, $"{user.LastName} {user.FirstName}"),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+            new Claim(ClaimTypes.NameIdentifier, $"{user.Id}"),
+            new Claim("name", $"{user.LastName} {user.FirstName}"),
+            new Claim("email", user.Email ?? string.Empty),
             new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
-            new Claim(ClaimTypes.Role, user.UserRoles.FirstOrDefault()?.Role.Name ?? "User")
         };
 
         var roles = await userManager.GetRolesAsync(user);
@@ -30,8 +30,6 @@ public class JwtTokenService(IConfiguration _configuration,
             claims.Add(new Claim("roles", role));
 
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-       
 
         var jwt = new JwtSecurityToken(
             signingCredentials: creds,

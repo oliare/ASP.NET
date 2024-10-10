@@ -1,8 +1,11 @@
 ﻿using ApiStore.Data.Entities.Identity;
 using ApiStore.Interfaces;
 using ApiStore.Models.Account;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ApiStore.Controllers
 {
@@ -26,10 +29,10 @@ namespace ApiStore.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
 
                 if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
-                    return Unauthorized("Invalid data");
+                    return BadRequest("Invalid data");
 
-                var token = _jwtTokenService.GenerateToken(user);
-                return Ok(new { token });
+                var token = await _jwtTokenService.GenerateToken(user);
+                return Ok(new { token, user.FirstName, user.Email, user.LastName, user.Image });
             }
             catch (Exception ex)
             {
@@ -37,6 +40,13 @@ namespace ApiStore.Controllers
             }
         }
 
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
+        {
+            var userId = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var user = await _userManager.FindByIdAsync(userId);
+            return Ok(user);    
+        }
     }
 
 }
