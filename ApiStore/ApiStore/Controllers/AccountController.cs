@@ -17,7 +17,7 @@ namespace ApiStore.Controllers
         private IImageTool _imageTool;
         private IMapper _mapper;
         public AuthController(UserManager<UserEntity> userManager, IJwtTokenService jwtTokenService,
-            IImageTool imageTool, IMapper mapper)
+            ImageTool imageTool, IMapper mapper)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
@@ -45,13 +45,13 @@ namespace ApiStore.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        public async Task<IActionResult> Register([FromForm] RegisterViewModel model)
         {
             try
             {
                 string image = string.Empty;
-                if (!(string.IsNullOrEmpty(model.Image)))
-                    image = await _imageTool.SaveImageByUrl(model.Image);
+                if (model.Image != null)
+                    image = await _imageTool.Save(model.Image);
 
                 var user = _mapper.Map<UserEntity>(model);
                 user.Image = image;
