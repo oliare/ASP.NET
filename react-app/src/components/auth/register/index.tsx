@@ -55,7 +55,17 @@ const RegisterPage = () => {
           rules={[{ required: true, message: 'Please provide a valid Last Name.' }]}>
           <Input placeholder='Last Name' />
         </Form.Item>
+        
+        <Form.Item name="email" label="Email" hasFeedback
+          rules={[{ required: true, type: 'email', message: 'Please provide a valid email address.' }]}>
+          <Input placeholder='Email' />
+        </Form.Item>
 
+        <Form.Item name="password" label="Password" hasFeedback
+          rules={[{ required: true, message: 'Please provide a valid password.' }]}>
+          <Input.Password placeholder='Password' />
+        </Form.Item>
+        
         <Form.Item name="image" label="Photo" valuePropName="file"
           rules={[{ required: true, message: "Please choose a photo for the category." }]}>
           <Upload beforeUpload={() => false} accept="image/*" listType="picture-card"
