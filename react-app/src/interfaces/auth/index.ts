@@ -1,6 +1,6 @@
 export interface IUserLogin {
-    email: string
-    password: string,
+    email: string;
+    password: string;
 }
 
 export interface IUserRegister {
@@ -10,3 +10,16 @@ export interface IUserRegister {
     email: string;
     password: string;
 }
+
+export interface IUser {
+    firstName: string;
+    lastName: string;
+    email: string;
+    image: string;  
+    token: string; 
+}
+
+export interface IAuthResponse {
+    user: IUser;
+    token: string; 
+  }

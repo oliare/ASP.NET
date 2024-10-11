@@ -1,11 +1,10 @@
-﻿using ApiStore.Data.Entities.Identity;
+﻿using ApiStore.Constants;
+using ApiStore.Data.Entities.Identity;
 using ApiStore.Interfaces;
 using ApiStore.Models.Account;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace ApiStore.Controllers
 {
@@ -15,10 +14,15 @@ namespace ApiStore.Controllers
     {
         private readonly UserManager<UserEntity> _userManager;
         private IJwtTokenService _jwtTokenService;
-        public AuthController(UserManager<UserEntity> userManager, IJwtTokenService jwtTokenService)
+        private IImageTool _imageTool;
+        private IMapper _mapper;
+        public AuthController(UserManager<UserEntity> userManager, IJwtTokenService jwtTokenService,
+            IImageTool imageTool, IMapper mapper)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
+            _imageTool = imageTool;
+            _mapper = mapper;
         }
 
         [HttpPost("login")]
@@ -31,7 +35,7 @@ namespace ApiStore.Controllers
                 if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
                     return BadRequest("Invalid data");
 
-                var token = await _jwtTokenService.GenerateToken(user);
+                var token = await _jwtTokenService.GenerateTokenAsync(user);
                 return Ok(new { token, user.FirstName, user.Email, user.LastName, user.Image });
             }
             catch (Exception ex)
@@ -40,12 +44,30 @@ namespace ApiStore.Controllers
             }
         }
 
-        [HttpGet("me")]
-        public async Task<IActionResult> Me()
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
-            var userId = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            var user = await _userManager.FindByIdAsync(userId);
-            return Ok(user);    
+            try
+            {
+                string image = string.Empty;
+                if (!(string.IsNullOrEmpty(model.Image)))
+                    image = await _imageTool.SaveImageByUrl(model.Image);
+
+                var user = _mapper.Map<UserEntity>(model);
+                user.Image = image;
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded) result = await _userManager.AddToRoleAsync(user, Roles.User);
+                else return BadRequest("Smth went wrong!");
+
+                var token = await _jwtTokenService.GenerateTokenAsync(user);
+                return Ok(new { token });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 

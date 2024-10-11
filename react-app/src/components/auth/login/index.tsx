@@ -1,27 +1,32 @@
 import { LockOutlined, InboxOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, Alert } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { httpService } from '../../../api/http-service';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../authSlice';
+import { IAuthResponse, IUser, IUserLogin } from '../../../interfaces/auth';
+import { useState } from 'react';
 
 const LoginPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
 
-  const onFinish = async (values: any) => {
-    // console.log('Received values: ', values);
-    const response = await httpService.post("api/auth/login", values);
-    // console.log("resp: ", response.data.token);
-    localStorage.setItem("accesstoken", response.data.token);
-    dispatch(loginSuccess({
-      // firstName: response.data.firstName,
-      // lastName: response.data.lastName,
-      firstName: "anme",
-      lastName: response.data.lastName,
-    }));
-    navigate("/");
+  const onFinish = async (values: IUserLogin) => {
+    try {
+      const response = await httpService.post<IAuthResponse>("api/auth/login", values);
+      localStorage.setItem("accesstoken", response.data.token);
+
+      dispatch(loginSuccess(response.data.user));
+      navigate("/");
+      // setUser(response.data.user);
+      window.location.reload(); // bad approach !!!
+
+    } catch (e) {
+      setError('Invalid credentials.');
+    }
   };
 
   return (
@@ -42,18 +47,25 @@ const LoginPage = () => {
           <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
         </Form.Item>
 
+        {error && (
+          <Alert message={error} type="error" className='mb-5' />
+        )}
+
         <Form.Item>
           <Button block htmlType="submit"
             className='text-white bg-gradient-to-br from-red-400 to-purple-500 font-medium rounded-lg mb-5'>
             Log in
           </Button>
+
           <div className="text-center">
             Don't have an account?
             <Link to={"/auth/register"} className='text-indigo-600'> Register</Link> now!
           </div>
         </Form.Item>
+
       </Form>
     </div>
+
   );
 };
 

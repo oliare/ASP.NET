@@ -1,16 +1,46 @@
 import { Button, Form, Input, Upload, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { registerSuccess } from '../authSlice';
+import { useState } from 'react';
+import { httpService } from '../../../api/http-service';
 
 const RegisterPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [image, setImage] = useState<string | null>(null);
 
-  const onFinish = (values) => {
-    console.log('Received values:', values);
-  dispatch(registerSuccess(values)); 
+  const onFinish = async (values: any) => {
+    try {
+      const user = {
+        ...values,
+        image: image,
+      };
+
+      const response = await httpService.post("api/auth/register",
+        user, {
+        headers: { 'Content-Type': 'multipart/form-data', },
+      });
+
+      dispatch(registerSuccess(response.data.user));
+      navigate("/");
+
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
+
+  const handleImage = (info: any) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.result) {
+        setImage(reader.result.toString());
+      }
+    };
+    reader.readAsDataURL(info.file.originFileObj);
+  };
+
 
   return (
     <>
@@ -28,7 +58,8 @@ const RegisterPage = () => {
 
         <Form.Item name="image" label="Photo" valuePropName="file"
           rules={[{ required: true, message: "Please choose a photo for the category." }]}>
-          <Upload beforeUpload={() => false} accept="image/*" listType="picture-card" maxCount={1}>
+          <Upload beforeUpload={() => false} accept="image/*" listType="picture-card"
+            maxCount={1} onChange={handleImage}>
             <div>
               <PlusOutlined />
               <div style={{ marginTop: 8 }}>Upload</div>

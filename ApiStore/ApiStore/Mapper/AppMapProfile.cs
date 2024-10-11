@@ -1,4 +1,6 @@
 ﻿using ApiStore.Data.Entities;
+using ApiStore.Data.Entities.Identity;
+using ApiStore.Models.Account;
 using ApiStore.Models.Category;
 using ApiStore.Models.Product;
 using AutoMapper;
@@ -31,5 +33,8 @@ public class AppMapProfile : Profile
         CreateMap<ProductEditViewModel, ProductEntity>()
             .ForMember(x => x.ProductImages, opt => opt.Ignore());
 
+        // Auth
+        CreateMap<RegisterViewModel, UserEntity>()
+            .ForMember(dest => dest.Image, opt => opt.Ignore());
     }
 }

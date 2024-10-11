@@ -7,6 +7,7 @@ import { loginSuccess, logoutSuccess } from '../../auth/authSlice';
 import { RootState } from '../../store';
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { IUser } from '../../../interfaces/auth';
 
 const navigation = [
     { name: 'Dashboard', href: '/', current: true },
@@ -17,7 +18,6 @@ const navigation = [
     { name: 'Reports', href: '#', current: false },
 ];
 
-
 const MainLayout = () => {
 
     const navigate = useNavigate();
@@ -25,20 +25,15 @@ const MainLayout = () => {
     const user = useSelector((state: RootState) => state.auth.user);
 
     const handleLogout = (value: string) => {
-        if (value != "Sign out") return;
+        if (value !== "Sign out") return;
         localStorage.removeItem('accesstoken');
-
         dispatch(logoutSuccess());
         navigate('/auth/login');
     };
-    interface IUserLoginInfo {
-        name: string,
-        email: string
-    }
 
     const [userNavigation, setUserNavigation] = useState<{ name: string; href: string; }[]>([]);
+
     useEffect(() => {
-        console.log(!!user?.firstName);
         const navigation = user?.firstName ? [
             { name: 'Profile', href: '/profile' },
             { name: 'Sign out', href: '#' },
@@ -47,26 +42,26 @@ const MainLayout = () => {
             { name: 'Register', href: '/auth/register' },
         ];
         setUserNavigation(navigation);
-    }, [user])
+    }, [user]);
 
     useEffect(() => {
-        console.log("test")
         const accesstoken = localStorage.getItem("accesstoken");
-
         if (accesstoken) {
-            const user: IUserLoginInfo = jwtDecode<IUserLoginInfo>(accesstoken);
-            console.log("USER:", user);
+            const user = jwtDecode<IUser>(accesstoken);
             dispatch(loginSuccess({
-                firstName: user.email,
-                lastName: user.name,
+                firstName: user.firstName || '',  
+                lastName: user.lastName || '',    
+                email: user.email,                
+                image: user.image || defaultIcon, 
+                token: accesstoken                
             }));
         }
+    }, [dispatch]);
 
-    }, [])
 
     function classNames(...classes: any[]) {
-            return classes.filter(Boolean).join(' ');
-        }
+        return classes.filter(Boolean).join(' ');
+    }
 
     return (
         <>
@@ -117,7 +112,7 @@ const MainLayout = () => {
                                             <MenuButton className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                                                 <span className="absolute -inset-1.5" />
                                                 <span className="sr-only">Open user menu</span>
-                                                <img alt="" src={user?.image} className="h-8 w-8 rounded-full" />
+                                                <img alt="" src={user?.image || defaultIcon} className="h-8 w-8 rounded-full" />
                                             </MenuButton>
                                         </div>
                                         <MenuItems
@@ -156,8 +151,8 @@ const MainLayout = () => {
                             {navigation.map((item) => (
                                 <DisclosureButton
                                     key={item.name}
-                                    as="a"
-                                    href={item.href}
+                                    as={Link}
+                                    to={item.href}
                                     aria-current={item.current ? 'page' : undefined}
                                     className={classNames(
                                         item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
@@ -190,8 +185,8 @@ const MainLayout = () => {
                                 {userNavigation.map((item) => (
                                     <DisclosureButton
                                         key={item.name}
-                                        as="a"
-                                        href={item.href}
+                                        as={Link}
+                                        to={item.href}
                                         className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                                     >
                                         {item.name}
