@@ -17,6 +17,7 @@ export interface IUser {
     email: string;
     image: string;  
     token: string; 
+    roles: string[];
 }
 
 export interface IAuthResponse {

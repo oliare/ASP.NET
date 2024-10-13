@@ -8,10 +8,11 @@ import { RootState } from '../../store';
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { IUser } from '../../../interfaces/auth';
+import { BASE_URL } from '../../../api/http-service';
 
 const navigation = [
     { name: 'Dashboard', href: '/', current: true },
-    { name: 'Categories', href: '/categories', current: false },
+    { name: 'Categories', href: '/', current: false },
     { name: 'Products', href: '/products', current: false },
     { name: 'Projects', href: '#', current: false },
     { name: 'Calendar', href: '#', current: false },
@@ -25,7 +26,7 @@ const MainLayout = () => {
     const user = useSelector((state: RootState) => state.auth.user);
 
     const handleLogout = (value: string) => {
-        if (value !== "Sign out") return;
+        if (value !== "Log out") return;
         localStorage.removeItem('accesstoken');
         dispatch(logoutSuccess());
         navigate('/auth/login');
@@ -35,8 +36,8 @@ const MainLayout = () => {
 
     useEffect(() => {
         const navigation = user?.firstName ? [
-            { name: 'Profile', href: '/profile' },
-            { name: 'Sign out', href: '#' },
+            { name: 'Profile', href: '/userProfile' },
+            { name: 'Log out', href: '/auth/login' },
         ] : [
             { name: 'Login', href: '/auth/login' },
             { name: 'Register', href: '/auth/register' },
@@ -49,15 +50,15 @@ const MainLayout = () => {
         if (accesstoken) {
             const user = jwtDecode<IUser>(accesstoken);
             dispatch(loginSuccess({
-                firstName: user.firstName || '',  
-                lastName: user.lastName || '',    
-                email: user.email,                
-                image: user.image || defaultIcon, 
-                token: accesstoken                
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                image: user.image ? `${BASE_URL}/images/300_${user.image}` : defaultIcon,
+                roles: user.roles,
+                token: accesstoken
             }));
         }
     }, [dispatch]);
-
 
     function classNames(...classes: any[]) {
         return classes.filter(Boolean).join(' ');
@@ -97,6 +98,7 @@ const MainLayout = () => {
                             </div>
                             <div className="hidden md:block">
                                 <div className="ml-4 flex items-center md:ml-6">
+                                    {user && <p className='text-white mr-3'>Welcome, {user?.firstName}!</p>}
                                     <button
                                         type="button"
                                         className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"

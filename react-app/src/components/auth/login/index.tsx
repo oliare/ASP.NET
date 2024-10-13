@@ -1,10 +1,10 @@
-import { LockOutlined, InboxOutlined } from '@ant-design/icons';
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Alert } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { httpService } from '../../../api/http-service';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../authSlice';
-import { IAuthResponse, IUser, IUserLogin } from '../../../interfaces/auth';
+import { IAuthResponse, IUserLogin } from '../../../interfaces/auth';
 import { useState } from 'react';
 
 const LoginPage = () => {
@@ -12,7 +12,6 @@ const LoginPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<IUser | null>(null);
 
   const onFinish = async (values: IUserLogin) => {
     try {
@@ -20,9 +19,7 @@ const LoginPage = () => {
       localStorage.setItem("accesstoken", response.data.token);
 
       dispatch(loginSuccess(response.data.user));
-      navigate("/");
-      // setUser(response.data.user);
-      window.location.reload(); // bad approach !!!
+      navigate("/userProfile");
 
     } catch (e) {
       setError('Invalid credentials.');
@@ -35,16 +32,14 @@ const LoginPage = () => {
       <Form onFinish={onFinish} className="w-full max-w-sm">
         <Form.Item
           name="email"
-          rules={[{ required: true, message: 'Please input your Email.' }]}
-        >
-          <Input prefix={<InboxOutlined />} placeholder="Email" />
+          rules={[{ required: true, message: 'Please input your Email.' }]}>
+          <Input prefix={<MailOutlined />} placeholder=" Email" />
         </Form.Item>
 
         <Form.Item
           name="password"
-          rules={[{ required: true, message: 'Please input your Password.' }]}
-        >
-          <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
+          rules={[{ required: true, message: 'Please input your Password.' }]}>
+          <Input.Password prefix={<LockOutlined />} type="password" placeholder=" Password" />
         </Form.Item>
 
         {error && (
