@@ -12,17 +12,19 @@ namespace ApiStore.Services;
 public class JwtTokenService(IConfiguration _configuration,
         UserManager<UserEntity> userManager) : IJwtTokenService
 {
-    public async Task<string> GenerateToken(UserEntity user)
+    public async Task<string> GenerateTokenAsync(UserEntity user)
     {
         var key = Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Jwt:Key"));
         var securityKey = new SymmetricSecurityKey(key);
-        
+
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, $"{user.LastName} {user.FirstName}"),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-            new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
-            new Claim(ClaimTypes.Role, user.UserRoles.FirstOrDefault()?.Role.Name ?? "User")
+             new Claim(ClaimTypes.NameIdentifier, $"{user.Id}"),
+             new Claim("firstName", user.FirstName ?? string.Empty),
+             new Claim("lastName", user.LastName ?? string.Empty),
+             new Claim("email", user.Email ?? string.Empty),
+             new Claim("image", user.Image ?? string.Empty),
+             new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
         };
 
         var roles = await userManager.GetRolesAsync(user);
@@ -30,8 +32,6 @@ public class JwtTokenService(IConfiguration _configuration,
             claims.Add(new Claim("roles", role));
 
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-       
 
         var jwt = new JwtSecurityToken(
             signingCredentials: creds,

@@ -4,5 +4,5 @@ namespace ApiStore.Interfaces;
 
 public interface IJwtTokenService
 {
-    Task<string> GenerateToken(UserEntity user);
+    Task<string> GenerateTokenAsync(UserEntity user);
 }
