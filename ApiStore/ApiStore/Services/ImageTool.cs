@@ -47,7 +47,7 @@ public class ImageTool(IConfiguration configuration) : IImageTool
         string fname = String.Empty;
         using (var client = new HttpClient())
         {
-            HttpResponseMessage response = client.GetAsync(url).Result;
+            HttpResponseMessage response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
                 byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
@@ -57,7 +57,7 @@ public class ImageTool(IConfiguration configuration) : IImageTool
         return fname;
     }
 
-    private string SaveByImageSize(byte[] bytes)
+    public string SaveByImageSize(byte[] bytes)
     {
         string imageName = Guid.NewGuid().ToString() + ".webp";
 
@@ -80,6 +80,15 @@ public class ImageTool(IConfiguration configuration) : IImageTool
             }
         }
         return imageName;
+    }
+    public string SaveImageFromBase64(string base64Image)
+    {
+        var base64Data = base64Image.Contains(",") ? base64Image.Split(',')[1] : base64Image;
+
+        byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+        return SaveByImageSize(imageBytes);
+       
     }
 
 }

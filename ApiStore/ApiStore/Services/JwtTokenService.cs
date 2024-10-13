@@ -23,6 +23,7 @@ public class JwtTokenService(IConfiguration _configuration,
              new Claim("firstName", user.FirstName ?? string.Empty),
              new Claim("lastName", user.LastName ?? string.Empty),
              new Claim("email", user.Email ?? string.Empty),
+             new Claim("image", user.Image ?? string.Empty),
              new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
         };
 

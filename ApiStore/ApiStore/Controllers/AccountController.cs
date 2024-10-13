@@ -17,7 +17,7 @@ namespace ApiStore.Controllers
         private IImageTool _imageTool;
         private IMapper _mapper;
         public AuthController(UserManager<UserEntity> userManager, IJwtTokenService jwtTokenService,
-            ImageTool imageTool, IMapper mapper)
+            IImageTool imageTool, IMapper mapper)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
@@ -45,13 +45,13 @@ namespace ApiStore.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] RegisterViewModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
             try
             {
                 string image = string.Empty;
                 if (model.Image != null)
-                    image = await _imageTool.Save(model.Image);
+                    image = _imageTool.SaveImageFromBase64(model.Image);
 
                 var user = _mapper.Map<UserEntity>(model);
                 user.Image = image;
@@ -59,7 +59,7 @@ namespace ApiStore.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded) result = await _userManager.AddToRoleAsync(user, Roles.User);
-                else return BadRequest("Smth went wrong!");
+                else return BadRequest(result.Errors);
 
                 var token = await _jwtTokenService.GenerateTokenAsync(user);
                 return Ok(new { token });
@@ -69,6 +69,15 @@ namespace ApiStore.Controllers
                 return BadRequest(ex.Message);
             }
         }
-    }
 
+        [HttpPost("checkEmail")]
+        public IActionResult CheckEmail([FromBody] EmailCheckRequest request)
+        {
+            var user = _userManager.Users.Any(u => u.Email == request.Email);
+            if (user) return Ok(new { exists = true });
+
+            return Ok(new { exists = false });
+        }
+
+    }
 }

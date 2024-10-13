@@ -35,6 +35,7 @@ public class AppMapProfile : Profile
 
         // Auth
         CreateMap<RegisterViewModel, UserEntity>()
-            .ForMember(dest => dest.Image, opt => opt.Ignore());
+           .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email)) 
+           .ForMember(dest => dest.Image, opt => opt.Ignore());
     }
 }
