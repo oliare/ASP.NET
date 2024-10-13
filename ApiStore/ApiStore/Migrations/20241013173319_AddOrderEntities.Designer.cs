@@ -3,6 +3,7 @@ using System;
 using ApiStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApiStore.Migrations
 {
     [DbContext(typeof(ApiStoreDbContext))]
-    partial class ApiStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241013173319_AddOrderEntities")]
+    partial class AddOrderEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -231,8 +234,8 @@ namespace ApiStore.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

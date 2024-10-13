@@ -3,6 +3,7 @@ using System;
 using ApiStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApiStore.Migrations
 {
     [DbContext(typeof(ApiStoreDbContext))]
-    partial class ApiStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241013173155_AddBasketsTable")]
+    partial class AddBasketsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,80 +186,6 @@ namespace ApiStore.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Baskets");
-                });
-
-            modelBuilder.Entity("ApiStore.Data.Entities.Orders.OrderEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("OrderStatusId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderStatusId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("ApiStore.Data.Entities.Orders.OrderItemEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("OrderItems");
-                });
-
-            modelBuilder.Entity("ApiStore.Data.Entities.Orders.OrderStatusEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OrderStatuses");
                 });
 
             modelBuilder.Entity("ApiStore.Data.Entities.ProductEntity", b =>
@@ -449,44 +378,6 @@ namespace ApiStore.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ApiStore.Data.Entities.Orders.OrderEntity", b =>
-                {
-                    b.HasOne("ApiStore.Data.Entities.Orders.OrderStatusEntity", "Status")
-                        .WithMany("Orders")
-                        .HasForeignKey("OrderStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ApiStore.Data.Entities.Identity.UserEntity", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Status");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ApiStore.Data.Entities.Orders.OrderItemEntity", b =>
-                {
-                    b.HasOne("ApiStore.Data.Entities.Orders.OrderEntity", "Order")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ApiStore.Data.Entities.ProductEntity", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("ApiStore.Data.Entities.ProductEntity", b =>
                 {
                     b.HasOne("ApiStore.Data.Entities.CategoryEntity", "Category")
@@ -577,16 +468,6 @@ namespace ApiStore.Migrations
             modelBuilder.Entity("ApiStore.Data.Entities.Identity.UserEntity", b =>
                 {
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("ApiStore.Data.Entities.Orders.OrderEntity", b =>
-                {
-                    b.Navigation("OrderItems");
-                });
-
-            modelBuilder.Entity("ApiStore.Data.Entities.Orders.OrderStatusEntity", b =>
-                {
-                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("ApiStore.Data.Entities.ProductEntity", b =>
