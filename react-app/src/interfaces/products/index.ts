@@ -14,10 +14,24 @@ export interface IProductCreate {
     images: File[]|null,
 }
 
-export interface IProductEdit{
-    name: string,
-    price: number,
-    categoryId: number,
-    prevImages: File[],
-    newImages: File[],
+export interface IProductEdit {
+    id: number;
+    name: string;
+    price: number;
+    categoryId: number;
+    previousImages: IUploadedFile[];
+    newImages?: File[];
+    imagesIds?: number[];
+}
+
+export interface IUploadedFile {
+    id: number;
+    image: string;
+    priority: number;
+    preview: any;
+    url: any;
+    originFileObj: File;
+    size: number;
+    type: string;
+    uid: string;
 }

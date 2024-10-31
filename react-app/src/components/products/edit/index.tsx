@@ -11,7 +11,7 @@ const ProductEditPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [form] = Form.useForm<IProductEdit>();
-    const [file, setFile] = useState<UploadFile[]>();
+    const [files, setFiles] = useState<UploadFile[]>([]);
 
     const [previewOpen, setPreviewOpen] = useState<boolean>(false);
     const [previewImage, setPreviewImage] = useState('');
@@ -25,40 +25,48 @@ const ProductEditPage = () => {
             });
     }, []);
 
+    useEffect(() => {
+        httpService.get<IProductEdit>(`/api/products/${id}`)
+            .then(resp => {
+                console.log("API Response: ", resp.data);
+                const { data } = resp;
+                form.setFieldsValue(resp.data);
+
+                if (data.previousImages) {
+                    const previousFiles = data.previousImages.map((image) => ({
+                        uid: image.id.toString(),
+                        name: image.image,
+                        status: 'done',
+                        url: `${BASE_URL}/images/1200_${image.image}`,
+                    } as UploadFile));
+                    setFiles(previousFiles);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching product details:", error);
+            });
+    }, []);
+
+
     const onSubmit = async (values: IProductEdit) => {
         try {
-            const resp = await httpService.put<IProductEdit>("/api/products",
-                { ...values, id, Image: file },
-                { headers: { "Content-Type": "multipart/form-data" } }
-            );
+            const updatedProduct = {
+                ...values,
+                newImages: files.map(file => file.originFileObj as File),
+                existingImages: files.map(file => file.url?.split('/').pop()),
+                id: Number(id),
+            };
+
+            const resp = await httpService.put<IProductEdit>(`/api/products`, updatedProduct, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
             console.log("Product updated: ", resp.data);
             navigate('/');
         } catch (error) {
             console.error("Error updating product: ", error);
         }
     };
-
-    useEffect(() => {
-        try {
-            httpService.get<IProductEdit>(`/api/products/${id}`)
-                .then(resp => {
-                    const { data } = resp;
-                    form.setFieldsValue(data);
-                    if (Array.isArray(data.prevImages) && data.prevImages.length > 0) {
-                        const previousFiles = data.prevImages.map((image, index) => ({
-                            uid: `prev-${index}`,
-                            name: image,
-                            status: 'done',
-                            url: `${BASE_URL}/images/${image}`,
-                        }));
-                        // setFile(previousFiles);
-                    }
-                });
-        } catch (error) {
-            console.error("Error updating:", error);
-        }
-    }, []);
-
 
     return (
         <>
@@ -90,6 +98,11 @@ const ProductEditPage = () => {
                     }}>
 
                     <Upload beforeUpload={() => false} accept="image/*" maxCount={10} listType="picture-card" multiple
+                        fileList={files}
+                        onChange={(data) => {
+                            setFiles(data.fileList);
+                            console.log("Updated files list: ", data.fileList);
+                        }}
                         onPreview={(file: UploadFile) => {
                             if (!file.url && !file.preview) {
                                 file.preview = URL.createObjectURL(file.originFileObj as RcFile);

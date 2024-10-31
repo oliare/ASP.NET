@@ -35,14 +35,13 @@ const HomePage = () => {
 
       <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-6'>
         {list.map(x =>
-          <div key={x.id} className='border rounded-lg overflow-hidden shadow-lg'>
+          <div key={x.id} className='border rounded-lg overflow-hidden shadow-lg flex flex-col'>
             <img src={`${BASE_URL}/images/1200_${x.image}`}
               alt={x.name} className='w-full h-48 object-cover' />
-            <div className='p-4'>
+            <div className='p-4 flex flex-col flex-grow'>
               <h3 className='text-xl font-semibold mb-2'>{x.name}</h3>
-              <p className='text-gray-700'>{x.description}</p>
-
-              <div className='flex justify-between items-center p-2 mt-6'>
+              <p className='text-gray-700'>{x.description.length > 100 ? `${x.description.substring(0, 60)}...` : x.description}</p>
+              <div className='flex justify-between items-center mt-auto p-2 pt-5'>
                 <Link to={`/edit/${x.id}`} className="text-black-500 hover:text-purple-700">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />

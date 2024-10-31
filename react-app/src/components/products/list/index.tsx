@@ -39,7 +39,7 @@ const ProductListPage = () => {
                         <Carousel arrows infinite={false}>
                             {item.images.map((image, i) => (
                                 <div key={i}>
-                                    <img src={`${BASE_URL}/images/${image}`} alt={item.name} className='w-full h-48 object-cover' />
+                                    <img src={`${BASE_URL}/images/1200_${image}`} alt={item.name} className='w-full h-48 object-cover' />
                                 </div>
                             ))}
                         </Carousel>
@@ -51,6 +51,9 @@ const ProductListPage = () => {
                         <div className='flex justify-between items-center p-2 m-2'>
                             <Link to={`/products/edit/${item.id}`} className="text-black-500 hover:text-purple-700">
                                 <EditOutlined />
+                            </Link>
+                            <Link to={`/products/details/${item.id}`}>
+                                <Button>More...</Button>
                             </Link>
                             <DeleteDialog title={"Notification"}
                                 description={`Are you sure you want to delete '${item.name}'?`}

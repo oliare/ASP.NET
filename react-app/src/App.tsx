@@ -9,6 +9,7 @@ import ProductEditPage from "./components/products/edit";
 import LoginPage from "./components/auth/login";
 import RegisterPage from "./components/auth/register";
 import UserProfilePage from "./components/userProfile/UserProfilePage";
+import ProductDetailPage from "./components/products/details/ProductDetailPage";
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                         <Route index element={<ProductListPage />} />
                         <Route path="create" element={<ProductCreatePage />} />
                         <Route path="edit/:id" element={<ProductEditPage />} />
+                        <Route path="details/:id" element={<ProductDetailPage />} />
                     </Route>
 
                     <Route path="auth/login" element={<LoginPage />} />
