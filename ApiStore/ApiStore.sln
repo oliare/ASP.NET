@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35219.272
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiStore", "ApiStore\ApiStore.csproj", "{65309689-E881-4FF6-BE02-C7AF8245B1FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleSimpleBot", "ConsoleSimpleBot\ConsoleSimpleBot.csproj", "{C821EAB2-EFDD-4B80-A30C-2917C6FECB19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleSimpleBot", "ConsoleSimpleBot\ConsoleSimpleBot.csproj", "{C821EAB2-EFDD-4B80-A30C-2917C6FECB19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
