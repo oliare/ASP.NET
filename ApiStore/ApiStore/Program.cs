@@ -111,11 +111,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+string imagesDirPath = Path.Combine(Directory.GetCurrentDirectory(), builder.Configuration["ImagesDir"]);
+
+if (!Directory.Exists(imagesDirPath))
+{
+    Directory.CreateDirectory(imagesDirPath);
+}
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), builder.Configuration["ImagesDir"])),
+    FileProvider = new PhysicalFileProvider(imagesDirPath),
     RequestPath = "/images"
 });
+
 
 using (var scope = app.Services.CreateScope())
 {

@@ -107,7 +107,7 @@ namespace ApiStore.Controllers
         public async Task<IActionResult> GetProductById(int id)
         {
             var product = await context.Products
-                .Include(x => x.ProductImages)
+                .ProjectTo<ProductItemViewModel>(mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync(p => p.Id == id);
             if (product == null) return NotFound();
             return Ok(product);
